@@ -26,8 +26,29 @@ export function useWebSocket(url?: string): UseWebSocketResult {
 
     ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data as string) as WsFrame
-        setFrame(data)
+        const msg = JSON.parse(event.data as string)
+
+        // Handle IoT data messages from the mmWave server envelope
+        if (msg.type === 'message' && msg.payload?.dataType === 'vitalsData') {
+          const p = msg.payload
+          const motion = (() => {
+            const m = (p.motionInformation ?? '').toLowerCase()
+            if (m.includes('still')) return 'still'
+            if (m.includes('moving') || m.includes('active')) return 'active'
+            return 'none'
+          })() as WsFrame['motion']
+
+          setFrame({
+            timestamp: msg.timestamp,
+            room: p.room ?? 'unknown',
+            heartRate: p.heartRate ?? 0,
+            presence: (p.existingInformation ?? '').toLowerCase().includes('present'),
+            motion,
+            bmp: p.bodyMovementParameters ?? 0,
+            fallen: false,
+            dwell: false,
+          })
+        }
       } catch {
         console.error('[ws] Failed to parse frame', event.data)
       }

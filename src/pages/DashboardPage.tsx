@@ -1,11 +1,6 @@
 import { useOutletContext } from 'react-router-dom'
 import { cn } from '../lib/utils'
-import {
-  AlertIcon,
-  alertIconWrapBg,
-  alertIconStroke,
-  alertDetailColor,
-} from '../components/shared/AlertRow'
+import { AlertRow } from '../components/shared/AlertRow'
 import type { PatientContext } from '../types/monitoring'
 import { alerts } from '../data/mock'
 
@@ -36,7 +31,7 @@ const RISK_LABELS: Record<string, string> = {
 }
 
 export function DashboardPage() {
-  const { frame, connected, fallStatus } = useOutletContext<PatientContext>()
+  const { frame, connected, fallStatus, alertActions, onAlertAction, liveFallSnapshot } = useOutletContext<PatientContext>()
   const isFallen = fallStatus === 'fallen'
   const room = frame?.room ?? 'living_room'
   const roomLabel = ROOM_LABELS[room] ?? room
@@ -45,7 +40,10 @@ export function DashboardPage() {
   const dot = ROOM_DOT[activeRoom] ?? ROOM_DOT.living
   const riskScore = isFallen ? 85 : 0
 
-  const recentAlerts = alerts.slice(0, 3)
+  const recentAlerts = [
+    ...(liveFallSnapshot ? [liveFallSnapshot] : []),
+    ...alerts.slice(0, liveFallSnapshot ? 2 : 3),
+  ]
 
   return (
     <div className="pb-5">
@@ -181,22 +179,14 @@ export function DashboardPage() {
 
         {/* Recent Alerts */}
         <p className="text-[11px] font-bold tracking-[.08em] text-slate-400 uppercase px-1 mt-1">Recent Alerts</p>
-        <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm px-4 py-1">
-          {recentAlerts.map((alert, idx) => (
-            <div
+        <div className="space-y-2">
+          {recentAlerts.map((alert) => (
+            <AlertRow
               key={alert.id}
-              className={cn('flex items-start gap-3 py-3', idx < recentAlerts.length - 1 && 'border-b border-slate-100')}
-            >
-              <div className={cn('size-9 rounded-[10px] flex items-center justify-center flex-shrink-0', alertIconWrapBg[alert.severity])}>
-                <AlertIcon iconType={alert.iconType} color={alertIconStroke[alert.severity]} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-slate-800">{alert.title}</p>
-                <p className={cn('text-[11px] font-semibold mt-0.5', alertDetailColor[alert.severity])}>{alert.detail}</p>
-                {alert.context && <p className="text-[12px] text-slate-400 mt-0.5">{alert.context}</p>}
-              </div>
-              <p className="text-[11px] text-slate-400 flex-shrink-0 pt-0.5">{alert.time}</p>
-            </div>
+              alert={alert}
+              actionTaken={alertActions[alert.id] ?? null}
+              onAction={(label) => onAlertAction(alert.id, label)}
+            />
           ))}
         </div>
       </div>

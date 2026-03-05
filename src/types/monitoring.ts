@@ -59,4 +59,8 @@ export type PatientContext = {
   fallStatus: FallStatus
   filter: AlertFilter
   setFilter: (v: AlertFilter) => void
+  alertActions: Record<string, string>
+  onAlertAction: (id: string, label: string) => void
+  fallResolvedAt: string | null
+  liveFallSnapshot: AlertItem | null
 }

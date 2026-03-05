@@ -2,15 +2,6 @@ import type { AlertItem, EventRow, SleepSession } from '../types/monitoring'
 
 export const alerts: AlertItem[] = [
   {
-    id: 'a1',
-    severity: 'critical',
-    iconType: 'alert-triangle',
-    title: 'Fall detected',
-    detail: 'Living room',
-    context: 'Emergency contacts notified',
-    time: '1d ago',
-  },
-  {
     id: 'a2',
     severity: 'warning',
     iconType: 'circle-info',
@@ -52,16 +43,15 @@ export const alerts: AlertItem[] = [
     iconType: 'walking',
     title: 'Extended walk',
     detail: 'Away 2h 14m',
-    context: 'New route detected',
     time: '3d ago',
   },
   {
     id: 'a7',
-    severity: 'ok',
-    iconType: 'check-circle',
-    title: 'Fall alert resolved',
-    detail: 'Oct 18 near-fall',
-    context: 'Marked resolved',
+    severity: 'critical',
+    iconType: 'alert-triangle',
+    title: 'Fall detected',
+    detail: 'Living room',
+    context: 'Emergency contacts notified',
     time: '4d ago',
   },
 ]
@@ -87,3 +77,14 @@ export const sleepSession: SleepSession = {
 }
 
 export const weeklyScores = [72, 88, 38, 65, 80, 30, 88]
+
+// bedtime / wake in extended 24h (e.g. 26 = 2 AM next day)
+export const weeklySleep = [
+  { bedtime: 22.5, wake: 28.5, deep: 58, light: 30, awake: 12 }, // Mon
+  { bedtime: 22.0, wake: 30.0, deep: 64, light: 25, awake: 11 }, // Tue
+  { bedtime: 23.5, wake: 28.5, deep: 35, light: 45, awake: 20 }, // Wed
+  { bedtime: 22.8, wake: 29.3, deep: 52, light: 35, awake: 13 }, // Thu
+  { bedtime: 22.2, wake: 29.7, deep: 60, light: 28, awake: 12 }, // Fri
+  { bedtime: 23.8, wake: 27.8, deep: 28, light: 48, awake: 24 }, // Sat
+  { bedtime: 22.0, wake: 30.0, deep: 64, light: 25, awake: 11 }, // Sun
+]

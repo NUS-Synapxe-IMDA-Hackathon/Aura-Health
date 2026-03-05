@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { usePatientData } from '../../hooks/usePatientData'
-import type { AlertFilter, PatientContext } from '../../types/monitoring'
+import type { AlertFilter, AlertItem, FallStatus, PatientContext } from '../../types/monitoring'
+import { alerts } from '../../data/mock'
 
 export type { PatientContext as AlertOutletContext }
 
@@ -50,8 +51,58 @@ const NAV_TABS = [
 ]
 
 export function AppShell() {
-  const { frame, connected, fallStatus } = usePatientData()
+  const { frame, connected } = usePatientData()
   const [filter, setFilter] = useState<AlertFilter>('all')
+  const [devFallen, setDevFallen] = useState(false)
+  const [alertActions, setAlertActions] = useState<Record<string, string>>({
+    a3: 'Dismissed',
+    a7: 'Resolved',
+  })
+  const [fallResolvedAt, setFallResolvedAt] = useState<string | null>(null)
+  const [liveFallSnapshot, setLiveFallSnapshot] = useState<AlertItem | null>(null)
+
+  const fallStatus: FallStatus = devFallen ? 'fallen' : 'not_fallen'
+
+  function onAlertAction(id: string, label: string) {
+    setAlertActions(prev => ({ ...prev, [id]: label }))
+    if (id === 'live-fall' && label === 'Resolved') {
+      setFallResolvedAt(
+        new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      )
+      setDevFallen(false)
+    }
+  }
+
+  const ROOM_LABELS: Record<string, string> = {
+    living_room: 'Living / Dining',
+    bathroom:    'Bathroom',
+    bedroom:     'Bedroom',
+    kitchen:     'Kitchen',
+  }
+
+  function handleDevToggle() {
+    if (!devFallen) {
+      // Triggering a new fall — clear previous state and capture a snapshot
+      setAlertActions(prev => { const next = { ...prev }; delete next['live-fall']; return next })
+      setFallResolvedAt(null)
+      const room = frame?.room ?? 'bathroom'
+      setLiveFallSnapshot({
+        id: 'live-fall',
+        severity: 'critical',
+        iconType: 'alert-triangle',
+        title: 'Fall detected',
+        detail: `${ROOM_LABELS[room] ?? room} · Just now`,
+        context: 'Emergency contacts notified',
+        time: 'Just now',
+      })
+    } else {
+      // Manually toggling back to safe — discard the fall alert entirely
+      setLiveFallSnapshot(null)
+      setAlertActions(prev => { const next = { ...prev }; delete next['live-fall']; return next })
+      setFallResolvedAt(null)
+    }
+    setDevFallen(v => !v)
+  }
 
   const context: PatientContext = {
     frame,
@@ -59,9 +110,17 @@ export function AppShell() {
     fallStatus,
     filter,
     setFilter,
+    alertActions,
+    onAlertAction,
+    fallResolvedAt,
+    liveFallSnapshot,
   }
 
-  const alertBadgeCount = fallStatus === 'fallen' ? 3 : 2
+  const openStatic = alerts.filter(
+    a => (a.severity === 'critical' || a.severity === 'warning') && !alertActions[a.id]
+  ).length
+  const openLiveFall = liveFallSnapshot && !alertActions['live-fall'] ? 1 : 0
+  const alertBadgeCount = openStatic + openLiveFall
 
   return (
     <div className="flex min-h-screen justify-center bg-slate-100">
@@ -69,6 +128,19 @@ export function AppShell() {
         <div className="absolute inset-x-0 top-0 bottom-20.5 overflow-y-auto pb-6">
           <Outlet context={context} />
         </div>
+
+        {/* Dev toggle — manual fall state control */}
+        <button
+          onClick={handleDevToggle}
+          className="absolute top-2 left-2 z-30 rounded-full px-3 py-1 text-[11px] font-bold border"
+          style={{
+            background: devFallen ? '#fff1f2' : '#f0fdfa',
+            color: devFallen ? '#e11d48' : '#0d9488',
+            borderColor: devFallen ? '#fecdd3' : '#99f6e4',
+          }}
+        >
+          {devFallen ? 'Fallen' : 'Safe'}
+        </button>
 
         <div className="absolute inset-x-0 bottom-0 z-20 flex h-20.5 items-start border-t border-slate-200 bg-white/90 px-1 pt-2.5 pb-4 backdrop-blur-xl">
           {NAV_TABS.map((tab) => (

@@ -1,8 +1,7 @@
 import { useOutletContext } from 'react-router-dom'
 import { Card, CardContent } from '../components/ui/card'
-import { SeverityBadge } from '../components/shared/SeverityBadge'
 import type { PatientContext } from '../types/monitoring'
-import { sleepSession, weeklyScores } from '../data/mock'
+import { sleepSession, weeklySleep } from '../data/mock'
 
 const STAGE_SEGMENTS = [
   ['4%',  'bg-amber-200'],
@@ -61,12 +60,11 @@ export function SleepPage() {
         </div>
 
         {/* Stage breakdown */}
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-3 gap-1.5">
           {[
             { color: 'bg-cyan-600',  value: `${s.deep_pct}%`,  label: 'Deep',      textColor: 'text-cyan-700'  },
             { color: 'bg-sky-300',   value: `${s.light_pct}%`, label: 'Light',     textColor: 'text-sky-700'   },
             { color: 'bg-amber-200', value: `${s.awake_pct}%`, label: 'Awake',     textColor: 'text-amber-800' },
-            { color: 'bg-teal-500',  value: `${Math.floor(s.duration_min * s.deep_pct / 100)}m`, label: 'Deep dur.', textColor: 'text-slate-800' },
           ].map(({ color, value, label, textColor }) => (
             <Card key={label} className="rounded-2xl py-3 shadow-sm">
               <CardContent className="px-2 text-center">
@@ -117,8 +115,6 @@ export function SleepPage() {
                 ['Avg Respiration',  `${s.respiration} /min`, ''],
                 ['Apnea Events',     '0',                 'text-emerald-700'],
                 ['Turns in Bed',     '7',                 ''],
-                ['Out of Bed',       '1 × · 6 min',       ''],
-                ['Awake Duration',   '35 min',            ''],
               ].map(([label, value, tone]) => (
                 <div key={label} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
                   <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase">{label}</p>
@@ -129,48 +125,102 @@ export function SleepPage() {
           </CardContent>
         </Card>
 
-        {/* Weekly trend */}
+        {/* Weekly sleep timing chart */}
         <Card className="rounded-3xl py-4">
           <CardContent className="px-4">
-            <p className="mb-3 text-xs font-bold tracking-wide text-slate-400 uppercase">Weekly Sleep Quality</p>
-            <div className="mb-2 flex h-16 items-end gap-1.5">
-              {weeklyScores.map((score, idx) => (
-                <div key={idx} className="flex flex-1 flex-col items-center gap-1">
-                  <div
-                    className={score < 45 ? 'bg-amber-300' : 'bg-teal-400'}
-                    style={{ height: `${score}%`, width: '100%', borderRadius: '4px 4px 0 0' }}
-                  />
+            <p className="mb-3 text-xs font-bold tracking-wide text-slate-400 uppercase">Weekly Sleep Timing</p>
+
+            {(() => {
+              const Y_START = 20   // 8 PM
+              const Y_END   = 32   // 8 AM next day
+              const RANGE   = Y_END - Y_START
+              const CHART_H = 200
+              const TOP     = 6
+              const LEFT    = 46
+              const COL_W   = 39
+              const BAR_W   = 24
+              const TOTAL_W = LEFT + COL_W * 7 + 4
+              const TOTAL_H = TOP + CHART_H + 22
+
+              const toY = (h: number) => TOP + ((h - Y_START) / RANGE) * CHART_H
+
+              const yLabels = [
+                { t: 20, label: '8 PM'  },
+                { t: 22, label: '10 PM' },
+                { t: 24, label: '12 AM' },
+                { t: 26, label: '2 AM'  },
+                { t: 28, label: '4 AM'  },
+                { t: 30, label: '6 AM'  },
+                { t: 32, label: '8 AM'  },
+              ]
+
+              return (
+                <svg viewBox={`0 0 ${TOTAL_W} ${TOTAL_H}`} className="w-full h-auto overflow-visible">
+                  {/* Horizontal grid lines */}
+                  {yLabels.map(({ t, label }) => (
+                    <g key={t}>
+                      <line
+                        x1={LEFT} y1={toY(t)} x2={TOTAL_W - 4} y2={toY(t)}
+                        stroke="#f1f5f9" strokeWidth="1"
+                      />
+                      <text
+                        x={LEFT - 4} y={toY(t) + 4}
+                        textAnchor="end" fontSize="8.5" fontWeight="600" fill="#94a3b8"
+                      >
+                        {label}
+                      </text>
+                    </g>
+                  ))}
+
+                  {/* Sleep blocks per day */}
+                  {weeklySleep.map((day, idx) => {
+                    const x    = LEFT + idx * COL_W + (COL_W - BAR_W) / 2
+                    const top  = toY(day.bedtime)
+                    const bot  = toY(day.wake)
+                    const h    = bot - top
+                    const dH   = h * day.deep  / 100
+                    const lH   = h * day.light / 100
+                    const aH   = h * day.awake / 100
+
+                    return (
+                      <g key={idx}>
+                        {/* Deep sleep — cyan-600 */}
+                        <rect x={x} y={top}           width={BAR_W} height={dH} fill="#0891b2" rx="3" ry="3"/>
+                        {/* Light sleep — sky-300 */}
+                        <rect x={x} y={top + dH}      width={BAR_W} height={lH} fill="#7dd3fc"/>
+                        {/* Awake — amber-200 */}
+                        <rect x={x} y={top + dH + lH} width={BAR_W} height={aH} fill="#fde68a"/>
+                        {/* Round bottom corners on awake band */}
+                        <rect x={x} y={top + dH + lH + aH - 3} width={BAR_W} height={3} fill="#fde68a" rx="3" ry="3"/>
+                        {/* Day label */}
+                        <text
+                          x={x + BAR_W / 2} y={TOP + CHART_H + 14}
+                          textAnchor="middle" fontSize="9" fontWeight="700" fill="#94a3b8"
+                        >
+                          {DAY_LABELS[idx]}
+                        </text>
+                      </g>
+                    )
+                  })}
+                </svg>
+              )
+            })()}
+
+            {/* Legend */}
+            <div className="mt-2 flex items-center gap-4">
+              {[
+                ['bg-cyan-600',  'Deep'],
+                ['bg-sky-300',   'Light'],
+                ['bg-amber-200', 'Awake'],
+              ].map(([color, label]) => (
+                <div key={label} className="flex items-center gap-1">
+                  <div className={`h-2 w-3 rounded-sm ${color}`} />
+                  <span className="text-[10px] text-slate-500">{label}</span>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between">
-              {DAY_LABELS.map((d) => (
-                <p key={d} className="flex-1 text-center text-[9px] font-bold text-slate-400">{d}</p>
-              ))}
-            </div>
-            <div className="mt-2 flex items-center justify-between">
-              <p className="text-xs text-slate-500">
-                Avg: <span className="font-bold text-slate-700">72 / 100</span>
-              </p>
-              <SeverityBadge severity="ok" />
-            </div>
           </CardContent>
         </Card>
-
-        {/* Safety status */}
-        <div className={[
-          'rounded-2xl border px-4 py-3',
-          isFallen ? 'border-rose-200 bg-rose-50' : 'border-emerald-200 bg-emerald-50',
-        ].join(' ')}>
-          <p className={['text-xs font-bold uppercase tracking-wide', isFallen ? 'text-rose-700' : 'text-emerald-700'].join(' ')}>
-            Safety Status
-          </p>
-          <p className={['mt-1 text-sm font-semibold', isFallen ? 'text-rose-800' : 'text-emerald-800'].join(' ')}>
-            {isFallen
-              ? 'Fall status is active. Prioritise wellness check before sleep routine coaching.'
-              : 'No active fall. Sleep recommendations are shown in normal mode.'}
-          </p>
-        </div>
 
         {/* AI insight */}
         <div className="bg-slate-900 rounded-[24px] p-4">

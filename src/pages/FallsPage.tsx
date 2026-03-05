@@ -22,7 +22,7 @@ const toneRing: Record<string, string> = {
 }
 
 export function FallsPage() {
-  const { frame, connected, fallStatus } = useOutletContext<PatientContext>()
+  const { frame, connected, fallStatus, fallResolvedAt } = useOutletContext<PatientContext>()
   const isFallen = fallStatus === 'fallen'
   const room = frame?.room ?? 'bathroom'
   const roomLabel = ROOM_LABELS[room] ?? room
@@ -135,29 +135,38 @@ export function FallsPage() {
           </div>
         </div>
 
-        {/* Timeline */}
-        {isFallen && (
+        {/* Timeline — shown when fallen or when a resolved timestamp exists */}
+        {(isFallen || fallResolvedAt) && (
           <>
             <p className="text-[11px] font-bold tracking-[.08em] text-slate-400 uppercase px-1">What happened</p>
             <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4">
               <div className="relative pl-7">
-                {eventRows.map(([time, title, sub, tone], idx) => (
-                  <div key={idx} className="relative pb-4 last:pb-0">
-                    {/* dot */}
-                    <div className={cn(
-                      'absolute -left-7 top-0.5 size-3 rounded-full border-2 border-white',
-                      toneColor[tone],
-                      tone === 'critical' && toneRing[tone],
-                    )} />
-                    {/* line */}
-                    {idx < eventRows.length - 1 && (
-                      <div className="absolute -left-[22px] top-3.5 bottom-0 w-px bg-slate-200" />
-                    )}
-                    <p className="text-[11px] font-bold text-slate-400">{time}</p>
-                    <p className="text-[13px] font-semibold text-slate-800 mt-0.5">{title}</p>
-                    <p className="text-[12px] text-slate-400 mt-0.5">{sub}</p>
+                {eventRows.map(([time, title, sub, tone], idx) => {
+                  const isLast = idx === eventRows.length - 1 && !fallResolvedAt
+                  return (
+                    <div key={idx} className="relative pb-4 last:pb-0">
+                      <div className={cn(
+                        'absolute -left-7 top-0.5 size-3 rounded-full border-2 border-white',
+                        toneColor[tone],
+                        tone === 'critical' && toneRing[tone],
+                      )} />
+                      {!isLast && (
+                        <div className="absolute -left-[22px] top-3.5 bottom-0 w-px bg-slate-200" />
+                      )}
+                      <p className="text-[11px] font-bold text-slate-400">{time}</p>
+                      <p className="text-[13px] font-semibold text-slate-800 mt-0.5">{title}</p>
+                      <p className="text-[12px] text-slate-400 mt-0.5">{sub}</p>
+                    </div>
+                  )
+                })}
+                {fallResolvedAt && (
+                  <div className="relative pb-0">
+                    <div className="absolute -left-7 top-0.5 size-3 rounded-full border-2 border-white bg-emerald-500" />
+                    <p className="text-[11px] font-bold text-slate-400">{fallResolvedAt}</p>
+                    <p className="text-[13px] font-semibold text-emerald-700 mt-0.5">Resolved by caregiver</p>
+                    <p className="text-[12px] text-slate-400 mt-0.5">Alert marked as resolved</p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </>

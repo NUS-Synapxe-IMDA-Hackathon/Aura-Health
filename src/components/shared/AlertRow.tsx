@@ -89,14 +89,23 @@ export function AlertIcon({ iconType, color }: { iconType: AlertIconType; color:
   }
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
+export const actionDoneLabel: Partial<Record<AlertItem['severity'], [string, string]>> = {
+  critical: ['Report viewed', 'Resolved'],
+  warning:  ['Dismissed',    'Checked in'],
+}
+
 type AlertRowProps = {
   alert: AlertItem
   className?: string
+  actionTaken?: string | null
+  onAction?: (label: string) => void
 }
 
-export function AlertRow({ alert, className }: AlertRowProps) {
+export function AlertRow({ alert, className, actionTaken, onAction }: AlertRowProps) {
   const borderColor = severityBorderColor[alert.severity]
   const alertActions = cardActions[alert.severity]
+  const doneLabels = actionDoneLabel[alert.severity]
 
   return (
     <div
@@ -116,15 +125,27 @@ export function AlertRow({ alert, className }: AlertRowProps) {
           {alert.context && <p className="text-[12px] text-slate-400 mt-0.5">{alert.context}</p>}
         </div>
       </div>
-      {alertActions && (
-        <div className="flex gap-2 mx-3.5 mb-3.5 pt-2.5 border-t border-slate-100">
-          <button className="flex-1 py-1.5 px-2.5 rounded-[10px] text-[12px] font-semibold bg-slate-100 text-slate-700 cursor-pointer">
-            {alertActions[0]}
-          </button>
-          <button className="flex-1 py-1.5 px-2.5 rounded-[10px] text-[12px] font-semibold bg-slate-900 text-white cursor-pointer">
-            {alertActions[1]}
-          </button>
-        </div>
+      {alertActions && doneLabels && (
+        actionTaken ? (
+          <div className="mx-3.5 mb-3.5 pt-2.5 border-t border-slate-100">
+            <p className="text-[12px] font-semibold text-slate-400">{actionTaken}</p>
+          </div>
+        ) : (
+          <div className="flex gap-2 mx-3.5 mb-3.5 pt-2.5 border-t border-slate-100">
+            <button
+              className="flex-1 py-1.5 px-2.5 rounded-[10px] text-[12px] font-semibold bg-slate-100 text-slate-700 cursor-pointer"
+              onClick={() => onAction?.(doneLabels[0])}
+            >
+              {alertActions[0]}
+            </button>
+            <button
+              className="flex-1 py-1.5 px-2.5 rounded-[10px] text-[12px] font-semibold bg-slate-900 text-white cursor-pointer"
+              onClick={() => onAction?.(doneLabels[1])}
+            >
+              {alertActions[1]}
+            </button>
+          </div>
+        )
       )}
     </div>
   )

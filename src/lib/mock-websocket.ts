@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { WsFrame } from '../types/monitoring'
 
 // Simulates a full fall scenario cycle: normal activity → fall → recovery
@@ -26,7 +26,6 @@ const MOCK_SEQUENCE: Omit<WsFrame, 'timestamp'>[] = [
   { presence: true, motion: 'active', bmp: 11, fallen: false, dwell: false, room: 'living_room', heartRate: 66 },
 ]
 
-const INTERVAL_MS = 3000
 
 type UseMockWebSocketResult = {
   frame: WsFrame | null
@@ -34,28 +33,24 @@ type UseMockWebSocketResult = {
   error: string | null
 }
 
+// Set to true to simulate a fallen state, false for safe state
+export let MOCK_FALLEN = false
+
+export function setMockFallen(fallen: boolean) {
+  MOCK_FALLEN = fallen
+}
+
 export function useMockWebSocket(): UseMockWebSocketResult {
   const [frame, setFrame] = useState<WsFrame | null>(null)
   const [connected, setConnected] = useState(false)
-  const indexRef = useRef(0)
 
   useEffect(() => {
-    // Simulate connection delay
     const connectTimer = setTimeout(() => {
       setConnected(true)
-      // Emit first frame immediately
       setFrame({ ...MOCK_SEQUENCE[0], timestamp: new Date().toISOString() })
     }, 500)
 
-    const interval = setInterval(() => {
-      indexRef.current = (indexRef.current + 1) % MOCK_SEQUENCE.length
-      setFrame({ ...MOCK_SEQUENCE[indexRef.current], timestamp: new Date().toISOString() })
-    }, INTERVAL_MS)
-
-    return () => {
-      clearTimeout(connectTimer)
-      clearInterval(interval)
-    }
+    return () => clearTimeout(connectTimer)
   }, [])
 
   return { frame, connected, error: null }
