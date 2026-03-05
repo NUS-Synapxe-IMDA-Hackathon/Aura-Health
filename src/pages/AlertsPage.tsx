@@ -1,15 +1,20 @@
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import { alerts } from '../data/monitoring'
-import { PageHeader } from '../components/shared/PageHeader'
-import { Button } from '../components/ui/button'
-import { Card, CardContent } from '../components/ui/card'
-import type { AlertOutletContext } from '../components/layout/AppShell'
+import { cn } from '../lib/utils'
+import { AlertRow } from '../components/shared/AlertRow'
+import type { PatientContext } from '../types/monitoring'
 import type { AlertFilter } from '../types/monitoring'
+import { alerts } from '../data/mock'
+
+const FILTER_PILLS: { label: string; value: AlertFilter | 'all' }[] = [
+  { label: 'All',      value: 'all' },
+  { label: 'Critical', value: 'critical' },
+  { label: 'Warning',  value: 'warning' },
+  { label: 'Notice',   value: 'notice' },
+]
 
 export function AlertsPage() {
-  const { fallStatus, filter, setFilter, count, incrementReview } = useOutletContext<AlertOutletContext>()
-  const isFallen = fallStatus === 'fallen'
+  const { filter, setFilter } = useOutletContext<PatientContext>()
 
   const visibleAlerts = useMemo(
     () => alerts.filter((item) => filter === 'all' || item.severity === filter),
@@ -18,67 +23,65 @@ export function AlertsPage() {
 
   return (
     <div className="pb-5">
-      <PageHeader eyebrow="History" title="Alerts" subtitle="Last 7 days" />
-      <div className="space-y-2 px-4">
-        <div
-          className={[
-            'rounded-2xl border px-4 py-3',
-            isFallen ? 'border-rose-200 bg-rose-50' : 'border-emerald-200 bg-emerald-50',
-          ].join(' ')}
-        >
-          <p className={['text-xs font-semibold', isFallen ? 'text-rose-800' : 'text-emerald-800'].join(' ')}>
-            {isFallen ? 'Active fall alert in monitoring stream.' : 'No active fall alert in monitoring stream.'}
+      {/* Page header */}
+      <div className="flex justify-between items-start px-5 pt-4 pb-2">
+        <div>
+          <p
+            className="text-[28px] leading-none text-slate-900"
+            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, letterSpacing: '-0.01em' }}
+          >
+            Alerts
           </p>
+          <p className="text-[13px] text-slate-400 mt-1">Last 7 days</p>
+        </div>
+        <button className="size-9 rounded-full bg-slate-200 flex items-center justify-center text-[13px] font-bold text-slate-600 mt-2">
+          SC
+        </button>
+      </div>
+
+      <div className="px-4 space-y-2">
+        {/* Milestone card */}
+        <div className="flex items-center gap-3 bg-white rounded-[20px] border border-slate-100 shadow-sm p-3.5">
+          <div className="size-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="6"/>
+              <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+            </svg>
+          </div>
+          <div>
+            <p className="text-[13px] font-bold text-slate-800">3 days without critical alerts</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Monitoring routine is working well</p>
+          </div>
         </div>
 
-        <div className="flex gap-1 overflow-x-auto pb-1">
-          {[
-            { label: 'All', value: 'all' },
-            { label: '🚨 Critical', value: 'critical' },
-            { label: '⚠️ Warning', value: 'warning' },
-            { label: '🔵 Notice', value: 'notice' },
-          ].map((pill) => (
-            <Button
+        {/* Filter pills */}
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {FILTER_PILLS.map((pill) => (
+            <button
               key={pill.value}
-              size="sm"
-              variant={filter === pill.value ? 'default' : 'outline'}
-              className="rounded-full"
               onClick={() => setFilter(pill.value as AlertFilter)}
+              className={cn(
+                'px-3.5 py-1 rounded-full text-[12px] font-semibold cursor-pointer flex-shrink-0 whitespace-nowrap border-[1.5px] transition-colors',
+                filter === pill.value
+                  ? 'bg-slate-900 text-white border-slate-900'
+                  : 'bg-white text-slate-500 border-slate-200',
+              )}
             >
               {pill.label}
-            </Button>
+            </button>
           ))}
         </div>
 
-        {(isFallen ? visibleAlerts : visibleAlerts.filter((item) => item.severity !== 'critical')).map((item) => (
-          <Card
-            key={item.id}
-            className={[
-              'rounded-2xl py-3',
-              item.severity === 'critical' && 'border-rose-200 bg-rose-50',
-              item.severity === 'warning' && 'border-amber-200 bg-amber-50',
-              item.severity === 'notice' && 'border-blue-200 bg-blue-50',
-              item.severity === 'ok' && 'border-emerald-200 bg-emerald-50',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          >
-            <CardContent className="flex items-center gap-3 px-4">
-              <p className="text-lg">{item.icon}</p>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-slate-800">{item.title}</p>
-                <p className="text-xs text-slate-600">{item.subtitle}</p>
-              </div>
-              <p className="text-[10px] font-medium text-slate-400">{item.time}</p>
-            </CardContent>
-          </Card>
-        ))}
-
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center">
-          <p className="text-xs font-semibold text-emerald-800">🌟 3 consecutive days without critical alerts</p>
-          <Button size="xs" variant="ghost" className="mt-1 text-[11px] text-emerald-800" onClick={incrementReview}>
-            Reviewed {count} times
-          </Button>
+        {/* Alert cards */}
+        <div className="space-y-2 pt-0.5">
+          {visibleAlerts.map((item) => (
+            <AlertRow key={item.id} alert={item} />
+          ))}
+          {visibleAlerts.length === 0 && (
+            <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-6 text-center">
+              <p className="text-sm text-slate-400">No alerts for this filter.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

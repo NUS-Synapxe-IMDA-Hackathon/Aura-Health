@@ -1,119 +1,205 @@
-import { Card, CardContent } from '../components/ui/card'
 import { useOutletContext } from 'react-router-dom'
-import type { AlertOutletContext } from '../components/layout/AppShell'
+import { cn } from '../lib/utils'
+import {
+  AlertIcon,
+  alertIconWrapBg,
+  alertIconStroke,
+  alertDetailColor,
+} from '../components/shared/AlertRow'
+import type { PatientContext } from '../types/monitoring'
+import { alerts } from '../data/mock'
+
+const ROOM_LABELS: Record<string, string> = {
+  living_room: 'Living / Dining',
+  bathroom:    'Bathroom',
+  bedroom:     'Bedroom',
+  kitchen:     'Kitchen',
+}
+
+const ROOM_KEY: Record<string, string> = {
+  living_room: 'living',
+  bathroom:    'bath',
+  bedroom:     'bedroom',
+  kitchen:     'kitchen',
+}
+
+const ROOM_DOT: Record<string, { cx: number; cy: number }> = {
+  living:  { cx: 217, cy: 110 },
+  bath:    { cx: 152, cy: 198 },
+  bedroom: { cx: 92,  cy: 84  },
+  kitchen: { cx: 305, cy: 99  },
+}
+
+const RISK_LABELS: Record<string, string> = {
+  not_fallen: 'Low · Score 0',
+  fallen:     'High · Score 85',
+}
 
 export function DashboardPage() {
-  const { fallStatus } = useOutletContext<AlertOutletContext>()
+  const { frame, connected, fallStatus } = useOutletContext<PatientContext>()
   const isFallen = fallStatus === 'fallen'
+  const room = frame?.room ?? 'living_room'
+  const roomLabel = ROOM_LABELS[room] ?? room
+  const activeRoom = ROOM_KEY[room] ?? 'living'
+  const heartRate = frame?.heartRate ?? 65
+  const dot = ROOM_DOT[activeRoom] ?? ROOM_DOT.living
+  const riskScore = isFallen ? 85 : 0
+
+  const recentAlerts = alerts.slice(0, 3)
 
   return (
-    <div className="space-y-3 px-4 pb-5">
-      <div className="px-1 pt-3">
-        <p className="text-[11px] font-bold tracking-[1.4px] text-slate-400 uppercase">Aura</p>
-        <h1 className="mt-1 text-[28px] leading-none font-semibold tracking-tight text-slate-900">Hi, Sarah</h1>
-        <p className="mt-1 text-xs text-slate-500">Monitoring Ashley · 78</p>
-      </div>
-
-      <div className="grid grid-cols-[1.15fr_1fr] gap-2.5">
-        <Card className="min-h-37.5 cursor-pointer bg-linear-to-br from-rose-50 to-rose-100 p-4 shadow-none">
-          <CardContent className="flex h-full flex-col justify-between">
-            <div className={[
-              'flex h-11 w-11 items-center justify-center rounded-2xl text-2xl shadow-md',
-              isFallen ? 'bg-rose-500 shadow-rose-300' : 'bg-emerald-500 shadow-emerald-300',
-            ].join(' ')}>
-              {isFallen ? '🚨' : '✅'}
+    <div className="pb-5">
+      {/* Header */}
+      <div className="flex items-start justify-between px-5 pt-4 pb-4">
+        <div>
+          <p
+            className="text-[30px] leading-none text-slate-900"
+            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, letterSpacing: '-0.01em' }}
+          >
+            Ashley Chen
+          </p>
+          <div className="flex items-center gap-2 mt-1.5">
+            <span className="text-[13px] text-slate-400">78 · {roomLabel}</span>
+            <div className={cn(
+              'flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold',
+              connected ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400',
+            )}>
+              <span className={cn(
+                'size-1.5 rounded-full',
+                connected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400',
+              )} />
+              {connected ? 'Live' : 'Offline'}
             </div>
-            <div>
-              <p className={['mt-2 text-[30px] leading-none font-semibold tracking-tight', isFallen ? 'text-rose-900' : 'text-emerald-900'].join(' ')}>
-                {isFallen ? 'Fallen' : 'Not Fallen'}
-              </p>
-              <p className={['mt-1 text-xs font-semibold', isFallen ? 'text-rose-700' : 'text-emerald-700'].join(' ')}>
-                {isFallen ? 'Toilet · Still' : 'Active · Moving normally'}
-              </p>
-              <p className={['mt-1 text-[10px]', isFallen ? 'text-rose-800/70' : 'text-emerald-800/70'].join(' ')}>
-                {isFallen ? 'Tap for report ›' : 'Safety check normal'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex flex-col gap-2.5">
-          <Card className="bg-linear-to-br from-teal-50 to-teal-100 p-3.5 shadow-none">
-            <CardContent>
-              <p className="mb-1 text-[10px] font-bold tracking-wide text-teal-700 uppercase">Heart Rate</p>
-              <p className="text-[30px] leading-none font-semibold tracking-tight text-teal-700">61</p>
-              <p className="mt-1 text-[11px] text-teal-600">bpm · sleep avg</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-linear-to-br from-blue-50 to-blue-100 p-3.5 shadow-none">
-            <CardContent>
-              <p className="mb-1 text-[10px] font-bold tracking-wide text-blue-800 uppercase">Sleep</p>
-              <p className="text-[30px] leading-none font-semibold tracking-tight text-blue-800">88</p>
-              <p className="mt-1 text-[11px] text-blue-700">Good · 64% deep</p>
-            </CardContent>
-          </Card>
+          </div>
         </div>
+        <button className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-[14px] font-bold text-slate-600 mt-1">
+          SC
+        </button>
       </div>
 
-      <Card className="border-none bg-linear-to-br from-slate-800 to-slate-900 p-5 text-white shadow-lg shadow-slate-900/20">
-        <CardContent className="flex items-center justify-between">
+      <div className="space-y-2.5 px-4">
+        {/* Heart Rate + Sleep cards — equal height grid */}
+        <div className="grid grid-cols-2 gap-2.5">
+          {/* Heart Rate */}
+          <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4 flex flex-col">
+            <p className="text-[10px] font-bold tracking-[.07em] uppercase text-slate-400">Heart Rate</p>
+            <div className="flex items-baseline gap-1 mt-1.5">
+              <span className="text-[36px] font-bold leading-none tracking-[-0.03em] text-rose-500">{heartRate}</span>
+              <span className="text-[13px] text-slate-400 font-medium">bpm</span>
+            </div>
+            <p className="text-[12px] font-semibold text-emerald-600 mt-1">Normal</p>
+            <div className="flex-1 min-h-4" />
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-slate-400">Live · now</span>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="#fecdd3" stroke="#e11d48" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </div>
+          </div>
+
+          {/* Sleep */}
+          <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4 flex flex-col">
+            <p className="text-[10px] font-bold tracking-[.07em] uppercase text-slate-400">Sleep</p>
+            <div className="flex items-baseline gap-1 mt-1.5">
+              <span className="text-[36px] font-bold leading-none tracking-[-0.03em] text-blue-500">88</span>
+              <span className="text-[13px] text-slate-400 font-medium">/ 100</span>
+            </div>
+            <p className="text-[12px] font-semibold text-blue-500 mt-1">Good · 8h 00m</p>
+            <div className="flex-1 min-h-4" />
+            <div className="flex rounded overflow-hidden h-1.5">
+              <div className="bg-blue-800" style={{ width: '64%' }} />
+              <div className="bg-blue-300" style={{ width: '25%' }} />
+              <div className="bg-slate-200" style={{ width: '11%' }} />
+            </div>
+            <div className="flex justify-between mt-1.5">
+              <span className="text-[9px] font-bold text-blue-800">64% deep</span>
+              <span className="text-[9px] font-bold text-blue-400">25% light</span>
+              <span className="text-[9px] font-bold text-slate-400">11% awake</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Fall Risk banner */}
+        <div className="bg-slate-900 rounded-[24px] p-4 flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-bold tracking-[1px] text-white/50 uppercase">Current Status</p>
-            <p className="mt-1 text-xl font-semibold tracking-tight">{isFallen ? 'Fall Detected' : 'No Fall Detected'}</p>
-            <p className="mt-1 text-xs text-white/60">{isFallen ? 'Toilet · Stationary dwell present' : 'Home · Motion pattern normal'}</p>
+            <p className="text-[10px] font-bold tracking-[.08em] uppercase text-white/40">Fall Risk</p>
+            <p className="text-[18px] font-bold text-white mt-0.5 tracking-tight">{RISK_LABELS[fallStatus]}</p>
+            <p className="text-[12px] text-white/50 mt-0.5">Continuously monitored</p>
           </div>
-          <div className={['flex h-18 w-18 items-center justify-center rounded-full border-4 text-center', isFallen ? 'border-rose-400' : 'border-emerald-300'].join(' ')}>
+          <div className={cn(
+            'size-14 rounded-full border-[3px] flex flex-col items-center justify-center',
+            isFallen ? 'border-rose-400' : 'border-emerald-400',
+          )}>
+            <span className="text-[18px] font-bold text-white leading-none">{riskScore}</span>
+            <span className="text-[8px] font-bold uppercase tracking-wide text-white/40">risk</span>
+          </div>
+        </div>
+
+        {/* Floorplan */}
+        <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4">
+          <div className="flex items-start justify-between mb-3">
             <div>
-              <p className="text-lg leading-none font-semibold">{isFallen ? '50' : '0'}</p>
-              <p className="text-[8px] font-bold tracking-wide text-white/60 uppercase">Risk</p>
+              <p className="text-[16px] font-bold text-slate-900">{roomLabel}</p>
+              <p className="text-[12px] text-slate-400 mt-0.5">Home · Last updated now</p>
             </div>
+            <span className={cn(
+              'px-2.5 py-1 rounded-full text-[12px] font-bold',
+              isFallen ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600',
+            )}>
+              {isFallen ? 'Fall' : 'Safe'}
+            </span>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card className="p-4">
-        <CardContent>
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase">Location Now</p>
-              <p className="mt-1 text-lg font-bold text-slate-900">
-                {isFallen ? 'Toilet' : 'Living/Dining'} <span className="text-xs font-medium text-slate-400">· Home</span>
-              </p>
-            </div>
-            <div
-              className={[
-                'rounded-xl px-3 py-2 text-center',
-                isFallen ? 'border border-rose-200 bg-rose-50' : 'border border-emerald-200 bg-emerald-50',
-              ].join(' ')}
-            >
-              <p className="text-[9px] font-bold tracking-wide text-rose-800 uppercase">Since</p>
-              <p className={['text-sm font-extrabold', isFallen ? 'text-rose-800' : 'text-emerald-800'].join(' ')}>{isFallen ? '1:23 PM' : 'Stable'}</p>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-2">
-            <svg viewBox="0 0 360 260" className="h-auto w-full" aria-label="Home floorplan">
-              <rect x="8" y="8" width="344" height="244" rx="4" fill="#f8fafc" stroke="#0f172a" strokeWidth="5" />
-
-              <rect x="20" y="20" width="145" height="115" fill="#f1f5f9" stroke="#0f172a" strokeWidth="2" />
-              <rect x="165" y="20" width="105" height="115" fill="#f1f5f9" stroke="#0f172a" strokeWidth="2" />
-              <rect x="270" y="55" width="70" height="80" fill="#f1f5f9" stroke="#0f172a" strokeWidth="2" />
-              <rect x="78" y="150" width="148" height="90" fill="#f1f5f9" stroke="#0f172a" strokeWidth="2" />
-
-              <line x1="20" y1="135" x2="340" y2="135" stroke="#0f172a" strokeWidth="2" />
-              <line x1="270" y1="55" x2="270" y2="135" stroke="#0f172a" strokeWidth="2" />
-              <line x1="226" y1="150" x2="226" y2="240" stroke="#0f172a" strokeWidth="2" />
-
-              <text x="92" y="84" textAnchor="middle" fontSize="13" fontWeight="700">BEDROOM</text>
-              <text x="217" y="78" textAnchor="middle" fontSize="12" fontWeight="700">LIVING/</text>
-              <text x="217" y="94" textAnchor="middle" fontSize="12" fontWeight="700">DINING</text>
-              <text x="305" y="99" textAnchor="middle" fontSize="12" fontWeight="700">KITCHEN</text>
-
-              <text x="152" y="198" textAnchor="middle" fontSize="13" fontWeight="700" fill={isFallen ? '#9f1239' : '#166534'}>BATH</text>
+          <div className="bg-slate-50 border border-slate-200 rounded-[14px] p-2">
+            <svg viewBox="0 0 360 260" className="w-full h-auto" aria-label="Home floorplan">
+              <rect x="8" y="8" width="344" height="244" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2"/>
+              <rect x="20" y="20" width="145" height="115"
+                fill={activeRoom === 'bedroom' ? (isFallen ? '#fecdd3' : '#bbf7d0') : '#f1f5f9'}
+                stroke="#cbd5e1" strokeWidth="1.5"/>
+              <rect x="165" y="20" width="105" height="115"
+                fill={activeRoom === 'living' ? (isFallen ? '#fecdd3' : '#bbf7d0') : '#f1f5f9'}
+                stroke="#cbd5e1" strokeWidth="1.5"/>
+              <rect x="270" y="55" width="70" height="80"
+                fill={activeRoom === 'kitchen' ? (isFallen ? '#fecdd3' : '#bbf7d0') : '#f1f5f9'}
+                stroke="#cbd5e1" strokeWidth="1.5"/>
+              <rect x="78" y="150" width="148" height="90"
+                fill={activeRoom === 'bath' ? (isFallen ? '#fecdd3' : '#bbf7d0') : '#f1f5f9'}
+                stroke="#cbd5e1" strokeWidth="1.5"/>
+              <line x1="20" y1="135" x2="340" y2="135" stroke="#cbd5e1" strokeWidth="1.5"/>
+              <line x1="270" y1="55" x2="270" y2="135" stroke="#cbd5e1" strokeWidth="1.5"/>
+              <line x1="226" y1="150" x2="226" y2="240" stroke="#cbd5e1" strokeWidth="1.5"/>
+              <text x="92" y="84" textAnchor="middle" fontSize="11" fontWeight="700" fill={activeRoom === 'bedroom' ? '#334155' : '#94a3b8'}>BEDROOM</text>
+              <text x="217" y="78" textAnchor="middle" fontSize="11" fontWeight="700" fill={activeRoom === 'living' ? '#334155' : '#94a3b8'}>LIVING/</text>
+              <text x="217" y="93" textAnchor="middle" fontSize="11" fontWeight="700" fill={activeRoom === 'living' ? '#334155' : '#94a3b8'}>DINING</text>
+              <text x="305" y="99" textAnchor="middle" fontSize="11" fontWeight="700" fill={activeRoom === 'kitchen' ? '#334155' : '#94a3b8'}>KITCHEN</text>
+              <text x="152" y="198" textAnchor="middle" fontSize="11" fontWeight="700" fill={activeRoom === 'bath' ? '#334155' : '#94a3b8'}>BATH</text>
+              {/* Location dot with outer ring */}
+              <circle cx={dot.cx} cy={dot.cy} r="10" fill={isFallen ? '#e11d48' : '#10b981'} opacity="0.25"/>
+              <circle cx={dot.cx} cy={dot.cy} r="6"  fill={isFallen ? '#e11d48' : '#10b981'}/>
             </svg>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Recent Alerts */}
+        <p className="text-[11px] font-bold tracking-[.08em] text-slate-400 uppercase px-1 mt-1">Recent Alerts</p>
+        <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm px-4 py-1">
+          {recentAlerts.map((alert, idx) => (
+            <div
+              key={alert.id}
+              className={cn('flex items-start gap-3 py-3', idx < recentAlerts.length - 1 && 'border-b border-slate-100')}
+            >
+              <div className={cn('size-9 rounded-[10px] flex items-center justify-center flex-shrink-0', alertIconWrapBg[alert.severity])}>
+                <AlertIcon iconType={alert.iconType} color={alertIconStroke[alert.severity]} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-semibold text-slate-800">{alert.title}</p>
+                <p className={cn('text-[11px] font-semibold mt-0.5', alertDetailColor[alert.severity])}>{alert.detail}</p>
+                {alert.context && <p className="text-[12px] text-slate-400 mt-0.5">{alert.context}</p>}
+              </div>
+              <p className="text-[11px] text-slate-400 flex-shrink-0 pt-0.5">{alert.time}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
