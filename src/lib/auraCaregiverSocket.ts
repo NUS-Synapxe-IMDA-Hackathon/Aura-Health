@@ -4,7 +4,12 @@
  * Pattern mirrors AuraSocket from AURA-Fall-Dectector.
  */
 
-import type { Alert, Incident, IncidentActionId, LockedBy } from "../types/monitoring";
+import type {
+  Alert,
+  Incident,
+  IncidentActionId,
+  LockedBy,
+} from "../types/monitoring";
 
 export class AuraCaregiverSocket {
   private ws: WebSocket | null = null;
@@ -15,18 +20,13 @@ export class AuraCaregiverSocket {
 
   // Event callbacks
   onIncidentCreated: ((incident: Incident) => void) | null = null;
-  onIncidentEscalated:
-    | ((incidentId: string, level: string, reason: string) => void)
-    | null = null;
-  onIncidentUpdated:
-    | ((incidentId: string, incident: Incident) => void)
-    | null = null;
+  onIncidentUpdated: ((incidentId: string, incident: Incident) => void) | null =
+    null;
   onIncidentResolved:
     | ((incidentId: string, resolution: string) => void)
     | null = null;
-  onIncidentLocked:
-    | ((incidentId: string, lockedBy: LockedBy) => void)
-    | null = null;
+  onIncidentLocked: ((incidentId: string, lockedBy: LockedBy) => void) | null =
+    null;
   onAlert: ((alert: Alert) => void) | null = null;
   onStatus: ((state: string, message: string) => void) | null = null;
   onConnect: (() => void) | null = null;
@@ -93,14 +93,14 @@ export class AuraCaregiverSocket {
           case "incident_created":
             this.onIncidentCreated?.(msg.incident);
             break;
-          case "incident_escalated":
-            this.onIncidentEscalated?.(msg.incident_id, msg.level, msg.reason);
-            break;
           case "incident_updated":
             this.onIncidentUpdated?.(msg.incident_id, msg.incident);
             break;
           case "incident_resolved":
-            this.onIncidentResolved?.(msg.incident_id, msg.resolution ?? "unknown");
+            this.onIncidentResolved?.(
+              msg.incident_id,
+              msg.resolution ?? "unknown",
+            );
             break;
           case "incident_locked":
             this.onIncidentLocked?.(msg.incident_id, msg.locked_by);
