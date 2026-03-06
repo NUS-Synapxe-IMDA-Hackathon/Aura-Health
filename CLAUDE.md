@@ -26,6 +26,7 @@ No test runner is configured in this project.
 ### Shared State via Outlet Context
 
 `AppShell` maintains:
+
 - `fallStatus: FallStatus` — current fall state (`'fallen' | 'not_fallen'`), currently hardcoded to `'not_fallen'`
 - `filter: AlertFilter` — alert filter for AlertsPage (`'all' | 'critical' | 'warning' | 'notice'`)
 - `count` / `incrementReview` — tracks reviewed alert count
