@@ -1,4 +1,4 @@
-import type { AlertItem, EventRow, SleepSession } from '../types/monitoring'
+import type { AlertItem, EventRow, Incident, SleepSession } from '../types/monitoring'
 
 export const alerts: AlertItem[] = [
   {
@@ -74,6 +74,79 @@ export const sleepSession: SleepSession = {
   duration_min: 480,
   avg_hr: 61,
   respiration: 15,
+}
+
+export const mockIncident: Incident = {
+  id: 'inc-001',
+  started_at: '2026-03-07T05:23:39.000Z',
+  resolved_at: null,
+  source: 'camera',
+  severity: 'critical',
+  status: 'needs_attention',
+  headline: 'Fall in Living Room',
+  locked_by: null,
+  narrative: 'Ashley tripped over a loose rug near the sofa and fell. She is responsive but sounds distressed. Motion has been minimal since impact.',
+  tags: [
+    { label: 'Trip',            tone: 'warning'  },
+    { label: 'Limited Mobility', tone: 'warning' },
+    { label: 'No Injuries',     tone: 'info'     },
+  ],
+  voice: {
+    responded: true,
+    response_time_seconds: 8,
+    overall_emotion: 'distressed',
+    summary: 'Resident sounds distressed. Responded after 8 seconds.',
+    exchanges: [
+      { speaker: 'aura',     text: 'Ashley, are you okay? I detected a fall.',     emotion: null,         timestamp: '2026-03-07T05:23:44.000Z' },
+      { speaker: 'resident', text: 'Aiya... my leg pain...',                        emotion: 'distressed',  timestamp: '2026-03-07T05:23:47.000Z' },
+      { speaker: 'aura',     text: "I've alerted your family.",                     emotion: null,         timestamp: '2026-03-07T05:23:50.000Z' },
+      { speaker: 'resident', text: 'Okay... thank you...',                          emotion: 'distressed',  timestamp: '2026-03-07T05:23:53.000Z' },
+    ],
+  },
+  video: {
+    clip_url: '',
+    clip_duration_seconds: 15,
+    fall_confirmed: 'confirmed',
+    cause: 'Trip (rug)',
+    mobility: 'Limited — unable to stand independently',
+    injuries: ['None visible'],
+    environment: ['Loose rug near sofa', 'Dim lighting'],
+    moments: [
+      { time: '0:01', description: 'Walking toward sofa',          significance: 'info'     },
+      { time: '0:03', description: 'Foot catches rug edge',        significance: 'warning'  },
+      { time: '0:04', description: 'Falls, hits floor',            significance: 'critical' },
+      { time: '0:08', description: 'Tries to push up',             significance: 'warning'  },
+      { time: '0:12', description: 'Gives up, stays down',         significance: 'warning'  },
+    ],
+  },
+  detection: {
+    posture_transition: 'Standing → Lying',
+    impact_intensity: 'high',
+    confidence: 94,
+    method: 'MoveNet pose detection',
+  },
+  ai_assessment: {
+    reasoning: 'Escalated because resident reports leg pain and is unable to stand independently. High-impact fall confirmed by camera with 94% confidence.',
+    recommended_actions: [
+      'Check for leg or hip injury',
+      'Help resident to a safe position',
+      'Remove or secure the loose rug',
+    ],
+  },
+  event_timeline: [
+    { timestamp: '1:23:39 PM', label: 'Fall detected',              detail: 'MoveNet pose detection confirmed posture change' },
+    { timestamp: '1:23:41 PM', label: 'AI assessing',               detail: null },
+    { timestamp: '1:23:44 PM', label: 'Voice check-in started',     detail: 'AURA initiated voice contact with Ashley' },
+    { timestamp: '1:23:47 PM', label: 'Ashley responded',           detail: 'Responded after 8 seconds, sounds distressed' },
+    { timestamp: '1:23:50 PM', label: 'You were notified',          detail: null },
+    { timestamp: '1:23:59 PM', label: 'Emergency contacts alerted', detail: 'Family notified via app' },
+  ],
+  available_actions: [
+    { id: 'ACK',             label: "I'm On My Way"  },
+    { id: 'TALK_TO_AGENT',   label: 'Talk to AURA'   },
+    { id: 'TALK_TO_ELDERLY', label: 'Talk to Ashley' },
+    { id: 'ACK_MONITOR',     label: 'Monitor'         },
+  ],
 }
 
 export const weeklyScores = [72, 88, 38, 65, 80, 30, 88]

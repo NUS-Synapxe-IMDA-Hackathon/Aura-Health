@@ -36,7 +36,8 @@ export function DashboardPage() {
   const room = frame?.room ?? 'living_room'
   const roomLabel = ROOM_LABELS[room] ?? room
   const activeRoom = ROOM_KEY[room] ?? 'living'
-  const heartRate = frame?.heartRate ?? 65
+  const heartRate = connected && frame?.heartRate ? frame.heartRate : null
+  const beatDuration = heartRate ? `${(60 / heartRate).toFixed(2)}s` : '0s'
   const dot = ROOM_DOT[activeRoom] ?? ROOM_DOT.living
   const riskScore = isFallen ? 85 : 0
 
@@ -48,7 +49,7 @@ export function DashboardPage() {
   return (
     <div className="pb-5">
       {/* Header */}
-      <div className="flex items-start justify-between px-5 pt-4 pb-4">
+      <div className="flex items-start justify-between px-5 pt-6 pb-6">
         <div>
           <p
             className="text-[30px] leading-none text-slate-900"
@@ -82,14 +83,25 @@ export function DashboardPage() {
           <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4 flex flex-col">
             <p className="text-[10px] font-bold tracking-[.07em] uppercase text-slate-400">Heart Rate</p>
             <div className="flex items-baseline gap-1 mt-1.5">
-              <span className="text-[36px] font-bold leading-none tracking-[-0.03em] text-rose-500">{heartRate}</span>
-              <span className="text-[13px] text-slate-400 font-medium">bpm</span>
+              <span className={`text-[36px] font-bold leading-none tracking-[-0.03em] ${heartRate ? 'text-rose-500' : 'text-slate-300'}`}>
+                {heartRate ?? '--'}
+              </span>
+              {heartRate && <span className="text-[13px] text-slate-400 font-medium">bpm</span>}
             </div>
-            <p className="text-[12px] font-semibold text-emerald-600 mt-1">Normal</p>
+            <p className={`text-[12px] font-semibold mt-1 ${heartRate ? 'text-emerald-600' : 'text-slate-400'}`}>
+              {heartRate ? 'Normal' : 'Not detected'}
+            </p>
             <div className="flex-1 min-h-4" />
             <div className="flex justify-between items-center">
               <span className="text-[10px] text-slate-400">Live · now</span>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="#fecdd3" stroke="#e11d48" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="28" height="28" viewBox="0 0 24 24"
+                fill="#fecdd3" stroke="#e11d48" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                style={{
+                  transformOrigin: 'center',
+                  animation: heartRate ? `heartbeat ${beatDuration} ease-in-out infinite` : 'none',
+                }}
+              >
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
               </svg>
             </div>
@@ -99,20 +111,20 @@ export function DashboardPage() {
           <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4 flex flex-col">
             <p className="text-[10px] font-bold tracking-[.07em] uppercase text-slate-400">Sleep</p>
             <div className="flex items-baseline gap-1 mt-1.5">
-              <span className="text-[36px] font-bold leading-none tracking-[-0.03em] text-blue-500">88</span>
+              <span className="text-[36px] font-bold leading-none tracking-[-0.03em] text-teal-600">88</span>
               <span className="text-[13px] text-slate-400 font-medium">/ 100</span>
             </div>
-            <p className="text-[12px] font-semibold text-blue-500 mt-1">Good · 8h 00m</p>
+            <p className="text-[12px] font-semibold text-teal-600 mt-1">Good · 8h 00m</p>
             <div className="flex-1 min-h-4" />
             <div className="flex rounded overflow-hidden h-1.5">
-              <div className="bg-blue-800" style={{ width: '64%' }} />
-              <div className="bg-blue-300" style={{ width: '25%' }} />
-              <div className="bg-slate-200" style={{ width: '11%' }} />
+              <div className="bg-cyan-600" style={{ width: '64%' }} />
+              <div className="bg-sky-300"  style={{ width: '25%' }} />
+              <div className="bg-amber-200" style={{ width: '11%' }} />
             </div>
             <div className="flex justify-between mt-1.5">
-              <span className="text-[9px] font-bold text-blue-800">64% deep</span>
-              <span className="text-[9px] font-bold text-blue-400">25% light</span>
-              <span className="text-[9px] font-bold text-slate-400">11% awake</span>
+              <span className="text-[9px] font-bold text-cyan-700">64% deep</span>
+              <span className="text-[9px] font-bold text-sky-600">25% light</span>
+              <span className="text-[9px] font-bold text-amber-700">11% awake</span>
             </div>
           </div>
         </div>
@@ -178,7 +190,7 @@ export function DashboardPage() {
         </div>
 
         {/* Recent Alerts */}
-        <p className="text-[11px] font-bold tracking-[.08em] text-slate-400 uppercase px-1 mt-1">Recent Alerts</p>
+        <p className="text-[11px] font-bold tracking-[.08em] text-slate-400 uppercase px-1 mt-4">Recent Alerts</p>
         <div className="space-y-2">
           {recentAlerts.map((alert) => (
             <AlertRow

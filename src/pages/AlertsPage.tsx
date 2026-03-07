@@ -27,7 +27,7 @@ export function AlertsPage() {
   return (
     <div className="pb-5">
       {/* Page header */}
-      <div className="flex justify-between items-start px-5 pt-4 pb-2">
+      <div className="flex justify-between items-start px-5 pt-4 pb-6">
         <div>
           <p
             className="text-[28px] leading-none text-slate-900"

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { usePatientData } from '../../hooks/usePatientData'
-import type { AlertFilter, AlertItem, FallStatus, PatientContext } from '../../types/monitoring'
+import type { AlertFilter, AlertItem, FallStatus, Incident, PatientContext, ResolvedIncident } from '../../types/monitoring'
 import { alerts } from '../../data/mock'
 
 export type { PatientContext as AlertOutletContext }
@@ -20,13 +20,7 @@ const NAV_TABS = [
   {
     to: '/falls',
     label: 'Falls',
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <line x1="17" y1="11" x2="17" y2="17"/><line x1="14" y1="14" x2="20" y2="14"/>
-      </svg>
-    ),
+    icon: null,
   },
   {
     to: '/sleep',
@@ -60,8 +54,18 @@ export function AppShell() {
   })
   const [fallResolvedAt, setFallResolvedAt] = useState<string | null>(null)
   const [liveFallSnapshot, setLiveFallSnapshot] = useState<AlertItem | null>(null)
+  const [resolvedIncident, setResolvedIncident] = useState<ResolvedIncident | null>(null)
 
   const fallStatus: FallStatus = devFallen ? 'fallen' : 'not_fallen'
+
+  function onIncidentResolve(type: 'resolved' | 'false_alarm', incident: Incident) {
+    const resolvedAt = new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    setResolvedIncident({ incident, resolution: type, resolvedAt })
+    setDevFallen(false)
+    setLiveFallSnapshot(null)
+    setAlertActions(prev => { const next = { ...prev }; delete next['live-fall']; return next })
+    setFallResolvedAt(null)
+  }
 
   function onAlertAction(id: string, label: string) {
     setAlertActions(prev => ({ ...prev, [id]: label }))
@@ -83,6 +87,7 @@ export function AppShell() {
   function handleDevToggle() {
     if (!devFallen) {
       // Triggering a new fall — clear previous state and capture a snapshot
+      setResolvedIncident(null)
       setAlertActions(prev => { const next = { ...prev }; delete next['live-fall']; return next })
       setFallResolvedAt(null)
       const room = frame?.room ?? 'bathroom'
@@ -114,6 +119,8 @@ export function AppShell() {
     onAlertAction,
     fallResolvedAt,
     liveFallSnapshot,
+    resolvedIncident,
+    onIncidentResolve,
   }
 
   const openStatic = alerts.filter(
@@ -154,9 +161,23 @@ export function AppShell() {
                 ].join(' ')
               }
             >
-              {tab.icon}
+              {tab.to === '/falls' ? (
+                fallStatus === 'fallen' ? (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" fill="#e11d48"/>
+                    <line x1="12" y1="9" x2="12" y2="13" stroke="white" strokeWidth="2.5"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17" stroke="white" strokeWidth="2.5"/>
+                  </svg>
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                )
+              ) : tab.icon}
               <span>{tab.label}</span>
-              {tab.badge && (
+              {tab.badge && alertBadgeCount > 0 && (
                 <span className="absolute top-0 right-[calc(50%-18px)] inline-flex size-4 items-center justify-center rounded-full border-2 border-white bg-rose-500 text-[9px] font-extrabold text-white">
                   {alertBadgeCount}
                 </span>
