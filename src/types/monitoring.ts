@@ -202,7 +202,7 @@ export type Alert = {
   category: AlertCategory;
   title: string;
   ai_insight: AiInsight;
-  source_data: Record<string, any>;
+  source_data: Record<string, unknown>;
   incident_id: string | null;
   resident_id: string;
   timestamp: string;

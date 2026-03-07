@@ -137,19 +137,24 @@ export function SleepPage() {
   return (
     <div className="pb-5">
       {/* Page header */}
-      <div className="px-5 pt-4 pb-6">
-        <p
-          className="text-[28px] leading-none text-slate-900"
-          style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, letterSpacing: '-0.01em' }}
-        >
-          Sleep
-        </p>
-        <p className="text-[13px] text-slate-400 mt-1">
-          {loading
-            ? 'Loading session…'
-            : `Last session · ${dateLabel} · ${durationH}h ${durationM > 0 ? `${durationM}m` : ''}`
-          }
-        </p>
+      <div className="flex justify-between items-start px-5 pt-4 pb-6">
+        <div>
+          <p
+            className="text-[28px] leading-none text-slate-900"
+            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, letterSpacing: '-0.01em' }}
+          >
+            Sleep
+          </p>
+          <p className="text-[13px] text-slate-400 mt-1">
+            {loading
+              ? 'Loading session…'
+              : `Last session · ${dateLabel} · ${durationH}h ${durationM > 0 ? `${durationM}m` : ''}`
+            }
+          </p>
+        </div>
+        <button className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-[14px] font-bold text-slate-600 mt-1">
+          LC
+        </button>
       </div>
 
       <div className="space-y-3 px-4">
@@ -350,9 +355,19 @@ export function SleepPage() {
           </CardContent>
         </Card>
 
+        {/* AI insight */}
+        <div className="bg-slate-900 rounded-[24px] p-4">
+          <div className="flex items-center gap-1.5 mb-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5eead4" strokeWidth="2.5" strokeLinecap="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <span className="text-[10px] font-extrabold tracking-[.1em] uppercase text-teal-300">AI Sleep Insight</span>
+          </div>
+          <p className={`text-[13px] leading-relaxed ${loading ? 'text-white/30' : 'text-white/80'}`}>{aiInsight}</p>
+        </div>
+
         {/* Weekly sleep architecture chart */}
-        {true && (
-          <Card className="rounded-3xl py-4">
+        <Card className="rounded-3xl py-4">
             <CardContent className="px-4">
               <div className="flex items-center justify-between mb-0.5">
                 <p className="text-[15px] font-bold text-slate-900">Weekly Sleep Architecture</p>
@@ -591,18 +606,7 @@ export function SleepPage() {
               </div>
             </CardContent>
           </Card>
-        )}
 
-        {/* AI insight */}
-        <div className="bg-slate-900 rounded-[24px] p-4">
-          <div className="flex items-center gap-1.5 mb-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5eead4" strokeWidth="2.5" strokeLinecap="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg>
-            <span className="text-[10px] font-extrabold tracking-[.1em] uppercase text-teal-300">AI Sleep Insight</span>
-          </div>
-          <p className={`text-[13px] leading-relaxed ${loading ? 'text-white/30' : 'text-white/80'}`}>{aiInsight}</p>
-        </div>
       </div>
     </div>
   )

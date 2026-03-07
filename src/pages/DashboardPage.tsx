@@ -33,7 +33,7 @@ const RISK_LABELS: Record<string, string> = {
 export function DashboardPage() {
   const { frame, connected, fallStatus, alertActions, onAlertAction, liveFallSnapshot } = useOutletContext<PatientContext>()
   const isFallen = fallStatus === 'fallen'
-  const room = frame?.room ?? 'living_room'
+  const room = 'living_room'
   const roomLabel = ROOM_LABELS[room] ?? room
   const activeRoom = ROOM_KEY[room] ?? 'living'
   const heartRate = connected && frame?.heartRate ? frame.heartRate : null
@@ -55,10 +55,10 @@ export function DashboardPage() {
             className="text-[30px] leading-none text-slate-900"
             style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, letterSpacing: '-0.01em' }}
           >
-            Ashley Chen
+            Alex Tan
           </p>
           <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-[13px] text-slate-400">78 · {roomLabel}</span>
+            <span className="text-[13px] text-slate-400">67 · {roomLabel}</span>
             <div className={cn(
               'flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold',
               connected ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400',
@@ -71,8 +71,8 @@ export function DashboardPage() {
             </div>
           </div>
         </div>
-        <button className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-[14px] font-bold text-slate-600 mt-1">
-          SC
+        <button className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-[14px] font-bold text-slate-600 -mt-1">
+          LC
         </button>
       </div>
 

@@ -164,7 +164,7 @@ export function useSleepData(weekOffset = 0): SleepDataResult {
     }
 
     fetchLatest()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   // ── Weekly chart (changes with weekOffset) ───────────────────────────────
   const [weekly, setWeekly] = useState<WeeklyDay[]>([])

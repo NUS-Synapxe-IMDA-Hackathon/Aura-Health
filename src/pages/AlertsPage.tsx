@@ -37,8 +37,8 @@ export function AlertsPage() {
           </p>
           <p className="text-[13px] text-slate-400 mt-1">Last 7 days</p>
         </div>
-        <button className="size-9 rounded-full bg-slate-200 flex items-center justify-center text-[13px] font-bold text-slate-600 mt-2">
-          SC
+        <button className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-[14px] font-bold text-slate-600 mt-1">
+          LC
         </button>
       </div>
 

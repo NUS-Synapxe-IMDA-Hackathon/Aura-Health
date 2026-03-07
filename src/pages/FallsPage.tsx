@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { cn } from '../lib/utils'
 import { Card, CardContent } from '../components/ui/card'
 import type { Incident, PatientContext } from '../types/monitoring'
-import { mockIncident } from '../data/mock'
+import { mockIncident, monthlyRiskScores } from '../data/mock'
+import { useSleepData } from '../hooks/useSleepData'
 
 
 
@@ -118,11 +120,11 @@ function IncidentDetail({
         </CardContent>
       </Card>
 
-      {/* Voice — What Ashley Said */}
+      {/* Voice — What Alex Said */}
       {incident.voice && (
         <Card className="rounded-3xl py-4">
           <CardContent className="px-4">
-            <p className="text-[15px] font-bold text-slate-900 mb-3">What Ashley Said</p>
+            <p className="text-[15px] font-bold text-slate-900 mb-3">What Alex Said</p>
             <div className="space-y-3">
               {incident.voice.exchanges.map((ex, i) => (
                 <div key={i}>
@@ -130,7 +132,7 @@ function IncidentDetail({
                     <span className={cn('text-[10px] font-extrabold tracking-wide uppercase',
                       ex.speaker === 'aura' ? 'text-teal-500' : 'text-rose-400'
                     )}>
-                      {ex.speaker === 'aura' ? 'AURA' : 'Ashley'}
+                      {ex.speaker === 'aura' ? 'AURA' : 'Alex'}
                     </span>
                     {ex.emotion && (
                       <span className="text-[10px] text-amber-500 font-semibold">· {ex.emotion}</span>
@@ -331,11 +333,299 @@ function IncidentDetail({
   )
 }
 
+// ─── Fall Risk Report ────────────────────────────────────────────────────────
+
+const RISK_BADGE: Record<string, string> = {
+  low:    'bg-emerald-50 text-emerald-700',
+  medium: 'bg-amber-50 text-amber-700',
+  high:   'bg-rose-50 text-rose-600',
+}
+
+function RiskBadge({ level }: { level: 'low' | 'medium' | 'high' }) {
+  return (
+    <span className={cn('text-[11px] font-bold px-2 py-0.5 rounded-full capitalize', RISK_BADGE[level])}>
+      {level}
+    </span>
+  )
+}
+
+function ReportCard({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4 space-y-3">
+      <p className="text-[15px] font-bold text-slate-900">{title}</p>
+      {children}
+    </div>
+  )
+}
+
+function MetricRow({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="flex justify-between items-baseline">
+      <span className="text-[12px] text-slate-500">{label}</span>
+      <span className="text-[12px] font-semibold text-slate-800 text-right">
+        {value}
+        {sub && <span className="text-[11px] text-slate-400 font-normal ml-1">{sub}</span>}
+      </span>
+    </div>
+  )
+}
+
+function HazardRow({ room, hazards }: { room: string; hazards: string[] }) {
+  return (
+    <div>
+      <p className="text-[11px] font-bold text-slate-500 uppercase tracking-[.06em] mb-1">{room}</p>
+      {hazards.length === 0
+        ? <p className="text-[12px] text-emerald-600 font-medium">No hazards detected</p>
+        : hazards.map(h => (
+          <div key={h} className="flex items-start gap-1.5 mb-0.5">
+            <span className="mt-1 size-1.5 rounded-full bg-amber-400 flex-shrink-0" />
+            <span className="text-[12px] text-slate-700">{h}</span>
+          </div>
+        ))
+      }
+    </div>
+  )
+}
+
+function HistoricalRiskCard({ scores }: { scores: number[] }) {
+  const W = 295
+  const H = 80
+  const pad = { t: 6, b: 18, l: 4, r: 4 }
+  const n = scores.length
+  const max = 100
+
+  // Build SVG polyline points
+  const pts = scores.map((v, i) => {
+    const x = pad.l + (i / (n - 1)) * (W - pad.l - pad.r)
+    const y = pad.t + (1 - v / max) * (H - pad.t - pad.b)
+    return [x, y] as [number, number]
+  })
+  const polyline = pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
+
+  // Area fill path
+  const areaPath =
+    `M${pts[0][0].toFixed(1)},${(H - pad.b).toFixed(1)} ` +
+    pts.map(([x, y]) => `L${x.toFixed(1)},${y.toFixed(1)}`).join(' ') +
+    ` L${pts[n - 1][0].toFixed(1)},${(H - pad.b).toFixed(1)} Z`
+
+  // Trend: compare last 7 vs prior 7
+  const recent = scores.slice(-7).reduce((a, b) => a + b, 0) / 7
+  const prior  = scores.slice(-14, -7).reduce((a, b) => a + b, 0) / 7
+  const diff   = recent - prior
+  const trend  = diff < -3 ? 'Improving' : diff > 3 ? 'Worsening' : 'Stable'
+  const trendColor = trend === 'Improving' ? 'text-emerald-600' : trend === 'Worsening' ? 'text-rose-500' : 'text-amber-600'
+
+  const current = scores[scores.length - 1]
+  const peak    = Math.max(...scores)
+
+  // Week labels: 4 evenly spaced
+  const weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4']
+  const weekXs = [0, 1, 2, 3].map(i => pad.l + (i / 3) * (W - pad.l - pad.r))
+
+  // Risk zone thresholds in y coords
+  const yMed  = pad.t + (1 - 33 / max) * (H - pad.t - pad.b)
+  const yHigh = pad.t + (1 - 66 / max) * (H - pad.t - pad.b)
+
+  return (
+    <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4 space-y-3">
+      <div className="flex justify-between items-start">
+        <div>
+          <p className="text-[15px] font-bold text-slate-900">Historical Risk</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">Past 28 days</p>
+        </div>
+        <span className={`text-[12px] font-bold ${trendColor}`}>{trend}</span>
+      </div>
+
+      {/* Chart */}
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto overflow-visible">
+        {/* Risk zone bands */}
+        <rect x={pad.l} y={pad.t}  width={W - pad.l - pad.r} height={yMed - pad.t}   fill="#fef2f2" opacity="0.6" />
+        <rect x={pad.l} y={yMed}   width={W - pad.l - pad.r} height={yHigh - yMed}   fill="#fffbeb" opacity="0.6" />
+        <rect x={pad.l} y={yHigh}  width={W - pad.l - pad.r} height={H - pad.b - yHigh} fill="#f0fdf4" opacity="0.6" />
+
+        {/* Area fill */}
+        <path d={areaPath} fill="#0d9488" opacity="0.08" />
+
+        {/* Line */}
+        <polyline points={polyline} fill="none" stroke="#0d9488" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+
+        {/* Current value dot */}
+        <circle cx={pts[n-1][0]} cy={pts[n-1][1]} r="3" fill="#0d9488" />
+
+        {/* Week labels */}
+        {weekLabels.map((label, i) => (
+          <text key={label} x={weekXs[i]} y={H - 2} fontSize="8" fill="#94a3b8" textAnchor={i === 0 ? 'start' : i === 3 ? 'end' : 'middle'}>
+            {label}
+          </text>
+        ))}
+      </svg>
+
+      {/* Legend */}
+      <div className="flex gap-3">
+        <div className="flex items-center gap-1"><span className="size-2 rounded-full bg-rose-200 inline-block" /><span className="text-[10px] text-slate-400">High</span></div>
+        <div className="flex items-center gap-1"><span className="size-2 rounded-full bg-amber-200 inline-block" /><span className="text-[10px] text-slate-400">Medium</span></div>
+        <div className="flex items-center gap-1"><span className="size-2 rounded-full bg-emerald-200 inline-block" /><span className="text-[10px] text-slate-400">Low</span></div>
+      </div>
+
+      <div className="border-t border-slate-100 pt-2 grid grid-cols-2 gap-y-1">
+        <span className="text-[12px] text-slate-500">Current score</span>
+        <span className="text-[12px] font-semibold text-slate-800 text-right">{current} / 100</span>
+        <span className="text-[12px] text-slate-500">Peak this month</span>
+        <span className="text-[12px] font-semibold text-slate-800 text-right">{peak} / 100</span>
+        <span className="text-[12px] text-slate-500">7-day avg</span>
+        <span className="text-[12px] font-semibold text-slate-800 text-right">{recent.toFixed(0)} / 100</span>
+      </div>
+    </div>
+  )
+}
+
+function FallRiskReport({ onBack }: { onBack: () => void }) {
+  const { session: s, loading } = useSleepData()
+
+  const score    = s?.sleep_quality_score ?? null
+  const durationH = s ? Math.floor(s.total_sleep_minutes / 60) : null
+  const durationM = s ? s.total_sleep_minutes % 60 : null
+  const efficiency = s ? `${s.sleep_efficiency.toFixed(1)}%` : '--'
+  const apnea    = s ? `${s.total_apnea_events}` : '--'
+
+  const sleepRiskLevel: 'low' | 'medium' | 'high' =
+    score === null ? 'low'
+    : score >= 70  ? 'low'
+    : score >= 50  ? 'medium'
+    : 'high'
+
+  const sleepInsight =
+    loading        ? 'Loading sleep data…'
+    : score === null ? 'No recent sleep session available.'
+    : score >= 70  ? 'Sleep quality is good. No significant contribution to fall risk from sleep patterns.'
+    : score >= 50  ? 'Sleep quality is fair. Poor sleep can reduce reaction time — monitor closely.'
+    : 'Poor sleep detected. Fatigue increases fall risk — consider discussing with a clinician.'
+
+  return (
+    <div className="pb-5">
+      {/* Header */}
+      <div className="flex justify-between items-start px-5 pt-4 pb-6">
+        <div>
+          <button
+            className="flex items-center gap-1 mb-2 text-slate-400 touch-manipulation"
+            onClick={onBack}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            <span className="text-[12px] font-semibold">Back</span>
+          </button>
+          <p
+            className="text-[28px] leading-none text-slate-900"
+            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, letterSpacing: '-0.01em' }}
+          >
+            Risk Report
+          </p>
+          <p className="text-[13px] text-slate-400 mt-1">Updated 7 Mar 2026</p>
+        </div>
+        <button className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-[14px] font-bold text-slate-600 mt-1">
+          LC
+        </button>
+      </div>
+
+      {/* Overall risk bar */}
+      <div className="px-4 mb-3">
+        <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4">
+          <div className="flex justify-between items-center mb-3">
+            <div>
+              <p className="text-[15px] font-bold text-slate-900">Overall Fall Risk</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Score: 15 / 100</p>
+            </div>
+            <RiskBadge level="low" />
+          </div>
+          <div className="flex justify-between text-[10px] text-slate-400 mb-1">
+            <span>Low</span><span>Medium</span><span>High</span>
+          </div>
+          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-full rounded-full bg-emerald-500" style={{ width: '15%' }} />
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2.5 px-4">
+
+        {/* Gait Analysis */}
+        <ReportCard title="Gait Analysis">
+          <MetricRow label="Gait speed"        value="1.12 m/s"  sub="≥ 1.0 m/s normal" />
+          <MetricRow label="Step length"       value="58 cm" />
+          <MetricRow label="Stride variability" value="11%"      sub="< 20% normal" />
+          <MetricRow label="Symmetry"          value="96%" />
+          <MetricRow label="Cadence"           value="112 steps/min" />
+          <MetricRow label="7-day trend"       value="Stable" />
+          <div className="flex justify-between items-center pt-1 border-t border-slate-100">
+            <span className="text-[11px] text-slate-400">Risk contribution</span>
+            <RiskBadge level="low" />
+          </div>
+        </ReportCard>
+
+        {/* Sit-to-Stand Test */}
+        <ReportCard title="Sit-to-Stand Test">
+          <MetricRow label="5-rep time"        value="10.4 s"    sub="≤ 12s normal" />
+          <MetricRow label="Assists needed"    value="None" />
+          <MetricRow label="Last tested"       value="6 Mar 2026" />
+          <MetricRow label="vs. baseline"      value="−0.8 s"    sub="improved" />
+          <div className="flex justify-between items-center pt-1 border-t border-slate-100">
+            <span className="text-[11px] text-slate-400">Risk contribution</span>
+            <RiskBadge level="low" />
+          </div>
+        </ReportCard>
+
+        {/* Room Safety Hazard */}
+        <ReportCard title="Room Safety Hazard">
+          <HazardRow room="Living / Dining" hazards={['Loose rug near sofa', 'Low coffee table']} />
+          <HazardRow room="Bedroom"         hazards={[]} />
+          <HazardRow room="Bathroom"        hazards={['No grab bar at shower']} />
+          <HazardRow room="Kitchen"         hazards={[]} />
+          <div className="pt-2 border-t border-slate-100 space-y-1">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-[.06em]">Recommendations</p>
+            {['Secure or remove rug near sofa', 'Install grab bar in bathroom shower'].map(r => (
+              <div key={r} className="flex items-start gap-1.5">
+                <span className="mt-1 size-1.5 rounded-full bg-slate-400 flex-shrink-0" />
+                <span className="text-[12px] text-slate-600">{r}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between items-center pt-1 border-t border-slate-100">
+            <span className="text-[11px] text-slate-400">Risk contribution</span>
+            <RiskBadge level="medium" />
+          </div>
+        </ReportCard>
+
+        {/* Sleep */}
+        <ReportCard title="Sleep">
+          <MetricRow label="Last session score"  value={score !== null ? `${score} / 100` : '--'} />
+          <MetricRow label="Sleep duration"       value={durationH !== null ? `${durationH}h${durationM ? ` ${durationM}m` : ''}` : '--'} />
+          <MetricRow label="Avg sleep efficiency" value={efficiency} />
+          <MetricRow label="Apnea events"         value={apnea} />
+          <div className="bg-slate-50 rounded-[12px] px-3 py-2">
+            <p className="text-[12px] text-slate-500 leading-relaxed">{sleepInsight}</p>
+          </div>
+          <div className="flex justify-between items-center pt-1 border-t border-slate-100">
+            <span className="text-[11px] text-slate-400">Risk contribution</span>
+            <RiskBadge level={sleepRiskLevel} />
+          </div>
+        </ReportCard>
+
+        {/* Historical Risk */}
+        <HistoricalRiskCard scores={monthlyRiskScores} />
+
+      </div>
+    </div>
+  )
+}
+
 export function FallsPage() {
   const { connected, fallStatus, resolvedIncident, onIncidentResolve } = useOutletContext<PatientContext>()
   const isFallen = fallStatus === 'fallen'
 
   const [viewingResolved, setViewingResolved] = useState(false)
+  const [viewingRiskReport, setViewingRiskReport] = useState(false)
+  const [viewingIncident, setViewingIncident] = useState(false)
 
   const subtitle = connected ? 'Live · Updated just now' : 'Connecting…'
 
@@ -352,6 +642,46 @@ export function FallsPage() {
       ],
     }
     onIncidentResolve(type, updatedIncident)
+    setViewingIncident(false)
+  }
+
+  // Drill-in: live incident detail
+  if (isFallen && viewingIncident) {
+    return (
+      <div className="pb-5">
+        <div className="flex justify-between items-start px-5 pt-4 pb-6">
+          <div>
+            <button
+              className="flex items-center gap-1 mb-2 text-slate-400 touch-manipulation"
+              onClick={() => setViewingIncident(false)}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+              <span className="text-[12px] font-semibold">Back</span>
+            </button>
+            <p className="text-[28px] leading-none text-slate-900"
+              style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, letterSpacing: '-0.01em' }}>
+              Fall Alert
+            </p>
+            <p className="text-[13px] text-slate-400 mt-1">{subtitle}</p>
+          </div>
+          <button className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-[14px] font-bold text-slate-600 mt-1">
+            LC
+          </button>
+        </div>
+        <IncidentDetail
+          incident={mockIncident}
+          isResolved={false}
+          onResolve={handleResolve}
+        />
+      </div>
+    )
+  }
+
+  // Drill-in: fall risk report
+  if (viewingRiskReport) {
+    return <FallRiskReport onBack={() => setViewingRiskReport(false)} />
   }
 
   // Drill-in: viewing a resolved incident in full detail
@@ -379,33 +709,66 @@ export function FallsPage() {
   return (
     <div className="pb-5">
       {/* Page header */}
-      <div className="px-5 pt-4 pb-6">
-        <p
-          className="text-[28px] leading-none text-slate-900"
-          style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, letterSpacing: '-0.01em' }}
-        >
-          Fall Alert
-        </p>
-        <p className="text-[13px] text-slate-400 mt-1">{subtitle}</p>
+      <div className="flex justify-between items-start px-5 pt-4 pb-6">
+        <div>
+          <p
+            className="text-[28px] leading-none text-slate-900"
+            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, letterSpacing: '-0.01em' }}
+          >
+            Fall Alert
+          </p>
+          <p className="text-[13px] text-slate-400 mt-1">{subtitle}</p>
+        </div>
+        <button className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-[14px] font-bold text-slate-600 mt-1">
+          LC
+        </button>
       </div>
 
-      {isFallen ? (
-        <IncidentDetail
-          incident={mockIncident}
-          isResolved={false}
-          onResolve={handleResolve}
-        />
-      ) : (
-        <div className="space-y-2.5 px-4">
+      <div className="space-y-2.5 px-4">
+
+          {/* Live fall alert card */}
+          {isFallen && (
+            <button
+              className="w-full text-left bg-rose-50 rounded-[24px] p-4 touch-manipulation"
+              onClick={() => setViewingIncident(true)}
+            >
+              <div className="flex items-start gap-3">
+                <div className="size-10 rounded-full bg-rose-500 flex items-center justify-center flex-shrink-0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[13px] font-bold text-rose-700">{mockIncident.headline}</p>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e11d48" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </div>
+                  <p className="text-[12px] text-rose-500 mt-0.5">Just now · Tap to view full report</p>
+                  <p className="text-[12px] text-rose-600/80 mt-1 leading-snug">{mockIncident.narrative}</p>
+                </div>
+              </div>
+            </button>
+          )}
 
           {/* Fall risk level */}
-          <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4">
+          <button
+            className="w-full bg-white rounded-[24px] border border-slate-100 shadow-sm p-4 text-left touch-manipulation"
+            onClick={() => setViewingRiskReport(true)}
+          >
             <div className="flex justify-between items-center mb-3">
               <div>
                 <p className="text-[15px] font-bold text-slate-900">Fall Risk Level</p>
                 <p className="text-[11px] text-slate-400 mt-0.5">Based on current sensor data</p>
               </div>
-              <span className="text-[13px] font-bold text-emerald-600">Low</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[13px] font-bold text-emerald-600">Low</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </div>
             </div>
             <div className="flex justify-between text-[10px] text-slate-400 mb-1">
               <span>Low</span><span>Medium</span><span>High</span>
@@ -413,7 +776,7 @@ export function FallsPage() {
             <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
               <div className="h-full rounded-full transition-all duration-700 bg-emerald-500" style={{ width: '15%' }} />
             </div>
-          </div>
+          </button>
 
           {/* AI insight */}
           <div className="bg-slate-900 rounded-[24px] p-4">
@@ -478,7 +841,6 @@ export function FallsPage() {
             )}
           </div>
         </div>
-      )}
     </div>
   )
 }

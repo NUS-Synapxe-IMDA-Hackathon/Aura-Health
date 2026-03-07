@@ -139,7 +139,7 @@ export function AppShell() {
         {/* Dev toggle — manual fall state control */}
         <button
           onClick={handleDevToggle}
-          className="absolute top-2 left-2 z-30 rounded-full px-3 py-1 text-[11px] font-bold border"
+          className="absolute top-2 right-2 z-30 rounded-full px-3 py-1 text-[11px] font-bold border"
           style={{
             background: devFallen ? '#fff1f2' : '#f0fdfa',
             color: devFallen ? '#e11d48' : '#0d9488',

@@ -6,18 +6,18 @@ const MOCK_SEQUENCE: Omit<WsFrame, 'timestamp'>[] = [
   { presence: false, motion: 'none', bmp: 0, fallen: false, dwell: false, room: 'living_room' },
   { presence: true, motion: 'active', bmp: 18, fallen: false, dwell: false, room: 'living_room', heartRate: 68 },
   { presence: true, motion: 'active', bmp: 22, fallen: false, dwell: false, room: 'living_room', heartRate: 71 },
-  { presence: true, motion: 'active', bmp: 12, fallen: false, dwell: false, room: 'bathroom', heartRate: 69 },
+  { presence: true, motion: 'active', bmp: 12, fallen: false, dwell: false, room: 'living_room', heartRate: 69 },
   // Fall impact
-  { presence: true, motion: 'active', bmp: 87, fallen: true, dwell: false, room: 'bathroom', heartRate: 95 },
+  { presence: true, motion: 'active', bmp: 87, fallen: true, dwell: false, room: 'living_room', heartRate: 95 },
   // Post-fall still
-  { presence: true, motion: 'still', bmp: 1, fallen: true, dwell: false, room: 'bathroom', heartRate: 88 },
+  { presence: true, motion: 'still', bmp: 1, fallen: true, dwell: false, room: 'living_room', heartRate: 88 },
   // Dwell begins
-  { presence: true, motion: 'still', bmp: 1, fallen: true, dwell: true, room: 'bathroom', heartRate: 82 },
-  { presence: true, motion: 'still', bmp: 1, fallen: true, dwell: true, room: 'bathroom', heartRate: 79 },
+  { presence: true, motion: 'still', bmp: 1, fallen: true, dwell: true, room: 'living_room', heartRate: 82 },
+  { presence: true, motion: 'still', bmp: 1, fallen: true, dwell: true, room: 'living_room', heartRate: 79 },
   // Recovery attempt
-  { presence: true, motion: 'active', bmp: 14, fallen: true, dwell: false, room: 'bathroom', heartRate: 85 },
+  { presence: true, motion: 'active', bmp: 14, fallen: true, dwell: false, room: 'living_room', heartRate: 85 },
   // Recovered
-  { presence: true, motion: 'active', bmp: 9, fallen: false, dwell: false, room: 'bathroom', heartRate: 74 },
+  { presence: true, motion: 'active', bmp: 9, fallen: false, dwell: false, room: 'living_room', heartRate: 74 },
   // Room empty
   { presence: false, motion: 'none', bmp: 0, fallen: false, dwell: false, room: 'living_room' },
   // Back to normal
