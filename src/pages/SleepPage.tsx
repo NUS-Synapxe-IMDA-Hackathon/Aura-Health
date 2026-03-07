@@ -60,9 +60,13 @@ function InfoIcon() {
 export function SleepPage() {
   const { fallStatus } = useOutletContext<PatientContext>()
   const isFallen = fallStatus === 'fallen'
-  const { session: s, intervals, weekly, weeklyIntervals, loading, error } = useSleepData()
+  const [weekOffset, setWeekOffset] = useState(0)
+  const { session: s, intervals, weekly, weeklyIntervals, hasOlderWeek, hasNewerWeek, loading, weeklyLoading, error } = useSleepData(weekOffset)
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
   const [selectedWeekDay, setSelectedWeekDay] = useState<number | null>(null)
+
+  function goOlder() { setWeekOffset(v => v + 1); setSelectedWeekDay(null) }
+  function goNewer() { setWeekOffset(v => v - 1); setSelectedWeekDay(null) }
 
   // Hard error — no data and not loading
   if (!s && !loading) {
@@ -100,7 +104,13 @@ export function SleepPage() {
 
   const anomalies = Array.isArray(s?.anomalies) ? (s!.anomalies as string[]) : []
 
-  const numDays   = weekly.length
+  const weekRangeLabel = (() => {
+    if (weekOffset === 0) return 'This week'
+    const fmt = (d: Date) => d.toLocaleDateString('en-SG', { month: 'short', day: 'numeric' })
+    const end = new Date(); end.setDate(end.getDate() - weekOffset * 7)
+    const start = new Date(end); start.setDate(end.getDate() - 6)
+    return `${fmt(start)} – ${fmt(end)}`
+  })()
   const aiInsight = isFallen
     ? 'Sleep quality remains good, but an active fall status is present. Use sleep data as secondary context until safety is confirmed.'
     : anomalies.length > 0
@@ -341,24 +351,41 @@ export function SleepPage() {
         </Card>
 
         {/* Weekly sleep architecture chart */}
-        {(loading || numDays > 0) && (
+        {true && (
           <Card className="rounded-3xl py-4">
             <CardContent className="px-4">
-              <p className="mb-3 text-[15px] font-bold text-slate-900">Weekly Sleep Architecture</p>
-
-              {loading ? (
-                /* Skeleton: 7 grey bars at plausible positions */
-                <div className="flex items-end gap-2 h-[200px] px-2">
-                  {[65, 80, 45, 70, 75, 40, 85].map((h, i) => (
-                    <div
-                      key={i}
-                      className="flex-1 rounded-md bg-slate-100 animate-pulse"
-                      style={{ height: `${h}%`, animationDelay: `${i * 80}ms` }}
-                    />
-                  ))}
+              <div className="flex items-center justify-between mb-0.5">
+                <p className="text-[15px] font-bold text-slate-900">Weekly Sleep Architecture</p>
+                <div className="flex items-center gap-0.5">
+                  {/* Older week */}
+                  <button
+                    onClick={goOlder}
+                    disabled={!hasOlderWeek}
+                    className={`p-1.5 rounded-lg touch-manipulation ${hasOlderWeek ? 'text-slate-500 active:bg-slate-100' : 'text-slate-200'}`}
+                    aria-label="Previous week"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                  </button>
+                  {/* Newer week */}
+                  <button
+                    onClick={goNewer}
+                    disabled={!hasNewerWeek}
+                    className={`p-1.5 rounded-lg touch-manipulation ${hasNewerWeek ? 'text-slate-500 active:bg-slate-100' : 'text-slate-200'}`}
+                    aria-label="Next week"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </button>
                 </div>
-              ) : (
-                (() => {
+              </div>
+              {weekRangeLabel && (
+                <p className="mb-3 text-[11px] text-slate-400">{weekRangeLabel}</p>
+              )}
+
+              {(() => {
                   const Y_START = 20
                   const Y_END   = 32
                   const RANGE   = Y_END - Y_START
@@ -367,7 +394,8 @@ export function SleepPage() {
                   const LEFT    = 46
                   const COL_W   = 39
                   const BAR_W   = 22
-                  const TOTAL_W = LEFT + COL_W * numDays + 4
+                  const NUM_COLS = 7
+                  const TOTAL_W = LEFT + COL_W * NUM_COLS + 4
                   const TOTAL_H = TOP + CHART_H + 30
 
                   const toY = (h: number) => TOP + ((h - Y_START) / RANGE) * CHART_H
@@ -393,6 +421,17 @@ export function SleepPage() {
                     { t: 32, label: '8 AM'  },
                   ]
 
+                  // Plausible placeholder positions for skeleton bars
+                  const PLACEHOLDER = [
+                    { bed: 22.25, wake: 29.75 },
+                    { bed: 22.0,  wake: 30.5  },
+                    { bed: 22.5,  wake: 28.5  },
+                    { bed: 22.0,  wake: 29.25 },
+                    { bed: 22.25, wake: 29.75 },
+                    { bed: 23.0,  wake: 29.0  },
+                    { bed: 22.0,  wake: 30.5  },
+                  ]
+
                   const getDayBarTop = (idx: number) => {
                     const dayIvs = weeklyIntervals[idx] ?? []
                     return dayIvs.length > 0
@@ -403,7 +442,7 @@ export function SleepPage() {
                   return (
                     <svg viewBox={`0 0 ${TOTAL_W} ${TOTAL_H}`} className="w-full h-auto overflow-visible" onClick={() => setSelectedWeekDay(null)}>
                       <defs>
-                        {weekly.map((day, idx) => {
+                        {!weeklyLoading && weekly.map((day, idx) => {
                           const dayIvs = weeklyIntervals[idx] ?? []
                           const clipTop = dayIvs.length > 0 ? toY(toExtH(dayIvs[0].start_time)) : toY(day.bedtime)
                           const clipBot = dayIvs.length > 0 ? toY(toExtH(dayIvs[dayIvs.length - 1].end_time)) : toY(day.wake)
@@ -416,7 +455,7 @@ export function SleepPage() {
                         })}
                       </defs>
 
-                      {/* Grid lines */}
+                      {/* Grid lines — always visible */}
                       {yLabels.map(({ t, label }) => (
                         <g key={t}>
                           <line x1={LEFT} y1={toY(t)} x2={TOTAL_W - 4} y2={toY(t)} stroke="#f1f5f9" strokeWidth="1" />
@@ -424,96 +463,116 @@ export function SleepPage() {
                         </g>
                       ))}
 
-                      {/* Sleep architecture per day */}
-                      {weekly.map((day, idx) => {
-                        const dayIvs = weeklyIntervals[idx] ?? []
-                        const x = LEFT + idx * COL_W + (COL_W - BAR_W) / 2
-                        const hasRealData = dayIvs.length > 0
+                      {weeklyLoading ? (
+                        /* Skeleton — bars + label pills, same positions as real data */
+                        <>
+                          {PLACEHOLDER.map((p, idx) => {
+                            const x = LEFT + idx * COL_W + (COL_W - BAR_W) / 2
+                            const y = toY(p.bed)
+                            const h = toY(p.wake) - y
+                            const lx = x + BAR_W / 2 - 8
+                            const ly = TOP + CHART_H + 7
+                            return (
+                              <g key={idx} style={{ animation: `pulse 1.5s ease-in-out ${idx * 80}ms infinite` }}>
+                                <rect x={x} y={y} width={BAR_W} height={h} fill="#f1f5f9" rx="3" ry="3" />
+                                <rect x={lx} y={ly} width={16} height={5} fill="#e2e8f0" rx="2" ry="2" />
+                              </g>
+                            )
+                          })}
+                        </>
+                      ) : (
+                        /* Real sleep architecture per day */
+                        <>
+                          {weekly.map((day, idx) => {
+                            const dayIvs = weeklyIntervals[idx] ?? []
+                            const x = LEFT + idx * COL_W + (COL_W - BAR_W) / 2
+                            const hasRealData = dayIvs.length > 0
 
-                        return (
-                          <g key={idx}>
-                            {hasRealData ? (
-                              <>
-                                <g clipPath={`url(#clip-${idx})`}>
-                                  {dayIvs.map((iv, i) => {
-                                    const startH = toExtH(iv.start_time)
-                                    const endH   = toExtH(iv.end_time)
-                                    return (
-                                      <rect
-                                        key={i}
-                                        x={x} y={toY(startH)}
-                                        width={BAR_W}
-                                        height={Math.max(toY(endH) - toY(startH), 1)}
-                                        fill={STAGE_FILL[iv.stage] ?? '#e2e8f0'}
-                                      />
-                                    )
-                                  })}
-                                </g>
-                                {dayIvs.map((iv, i) => {
-                                  if (!iv.apnea_events && !iv.abnormal_struggle) return null
-                                  const midY = (toY(toExtH(iv.start_time)) + toY(toExtH(iv.end_time))) / 2
-                                  return (
-                                    <circle key={`ev-${i}`} cx={x + BAR_W / 2} cy={midY} r="3"
-                                      fill={iv.apnea_events > 0 ? '#f43f5e' : '#f59e0b'} stroke="white" strokeWidth="1.5" />
-                                  )
-                                })}
-                              </>
-                            ) : (
-                              (() => {
-                                const top = toY(day.bedtime)
-                                const tot = toY(day.wake) - top
-                                const dH  = tot * day.deep  / 100
-                                const lH  = tot * day.light / 100
-                                const aH  = tot * day.awake / 100
-                                return (
+                            return (
+                              <g key={idx}>
+                                {hasRealData ? (
                                   <>
-                                    <rect x={x} y={top}                   width={BAR_W} height={dH} fill="#0891b2" rx="3" ry="3" />
-                                    <rect x={x} y={top + dH}              width={BAR_W} height={lH} fill="#7dd3fc" />
-                                    <rect x={x} y={top + dH + lH}         width={BAR_W} height={aH} fill="#fde68a" />
-                                    <rect x={x} y={top + dH + lH + aH - 3} width={BAR_W} height={3} fill="#fde68a" rx="3" ry="3" />
+                                    <g clipPath={`url(#clip-${idx})`}>
+                                      {dayIvs.map((iv, i) => {
+                                        const startH = toExtH(iv.start_time)
+                                        const endH   = toExtH(iv.end_time)
+                                        return (
+                                          <rect
+                                            key={i}
+                                            x={x} y={toY(startH)}
+                                            width={BAR_W}
+                                            height={Math.max(toY(endH) - toY(startH), 1)}
+                                            fill={STAGE_FILL[iv.stage] ?? '#e2e8f0'}
+                                          />
+                                        )
+                                      })}
+                                    </g>
+                                    {dayIvs.map((iv, i) => {
+                                      if (!iv.apnea_events && !iv.abnormal_struggle) return null
+                                      const midY = (toY(toExtH(iv.start_time)) + toY(toExtH(iv.end_time))) / 2
+                                      return (
+                                        <circle key={`ev-${i}`} cx={x + BAR_W / 2} cy={midY} r="3"
+                                          fill={iv.apnea_events > 0 ? '#f43f5e' : '#f59e0b'} stroke="white" strokeWidth="1.5" />
+                                      )
+                                    })}
                                   </>
-                                )
-                              })()
-                            )}
+                                ) : (
+                                  (() => {
+                                    const top = toY(day.bedtime)
+                                    const tot = toY(day.wake) - top
+                                    const dH  = tot * day.deep  / 100
+                                    const lH  = tot * day.light / 100
+                                    const aH  = tot * day.awake / 100
+                                    return (
+                                      <>
+                                        <rect x={x} y={top}                     width={BAR_W} height={dH} fill="#0891b2" rx="3" ry="3" />
+                                        <rect x={x} y={top + dH}                width={BAR_W} height={lH} fill="#7dd3fc" />
+                                        <rect x={x} y={top + dH + lH}           width={BAR_W} height={aH} fill="#fde68a" />
+                                        <rect x={x} y={top + dH + lH + aH - 3} width={BAR_W} height={3}  fill="#fde68a" rx="3" ry="3" />
+                                      </>
+                                    )
+                                  })()
+                                )}
 
-                            {/* Day label */}
-                            <text x={x + BAR_W / 2} y={TOP + CHART_H + 14} textAnchor="middle" fontSize="9" fontWeight="700" fill="#94a3b8">
-                              {day.dayLabel}
-                            </text>
+                                {/* Day label */}
+                                <text x={x + BAR_W / 2} y={TOP + CHART_H + 14} textAnchor="middle" fontSize="9" fontWeight="700" fill="#94a3b8">
+                                  {day.dayLabel}
+                                </text>
 
-                            {/* Transparent touch target */}
-                            <rect
-                              x={LEFT + idx * COL_W} y={TOP}
-                              width={COL_W} height={CHART_H}
-                              fill="transparent"
-                              style={{ cursor: 'pointer' }}
-                              onClick={(e) => { e.stopPropagation(); setSelectedWeekDay(selectedWeekDay === idx ? null : idx) }}
-                            />
+                                {/* Transparent touch target */}
+                                <rect
+                                  x={LEFT + idx * COL_W} y={TOP}
+                                  width={COL_W} height={CHART_H}
+                                  fill="transparent"
+                                  style={{ cursor: 'pointer' }}
+                                  onClick={(e) => { e.stopPropagation(); setSelectedWeekDay(selectedWeekDay === idx ? null : idx) }}
+                                />
 
-                            {/* Score popup on tap */}
-                            {selectedWeekDay === idx && (() => {
-                              const barTop = getDayBarTop(idx)
-                              const tw = 34; const th = 20
-                              const tx = x + BAR_W / 2 - tw / 2
-                              const ty = barTop - th - 7
-                              const cx = x + BAR_W / 2
-                              return (
-                                <g>
-                                  <rect x={tx} y={ty} width={tw} height={th} rx="5" ry="5" fill="#0f172a" />
-                                  <text x={cx} y={ty + th - 6} textAnchor="middle" fontSize="10" fontWeight="700" fill="white">
-                                    {day.score}
-                                  </text>
-                                  <polygon points={`${cx - 4},${barTop - 7} ${cx + 4},${barTop - 7} ${cx},${barTop - 2}`} fill="#0f172a" />
-                                </g>
-                              )
-                            })()}
-                          </g>
-                        )
-                      })}
+                                {/* Score popup on tap */}
+                                {selectedWeekDay === idx && (() => {
+                                  const barTop = getDayBarTop(idx)
+                                  const tw = 34; const th = 20
+                                  const tx = x + BAR_W / 2 - tw / 2
+                                  const ty = barTop - th - 7
+                                  const cx = x + BAR_W / 2
+                                  return (
+                                    <g>
+                                      <rect x={tx} y={ty} width={tw} height={th} rx="5" ry="5" fill="#0f172a" />
+                                      <text x={cx} y={ty + th - 6} textAnchor="middle" fontSize="10" fontWeight="700" fill="white">
+                                        {day.score}
+                                      </text>
+                                      <polygon points={`${cx - 4},${barTop - 7} ${cx + 4},${barTop - 7} ${cx},${barTop - 2}`} fill="#0f172a" />
+                                    </g>
+                                  )
+                                })()}
+                              </g>
+                            )
+                          })}
+                        </>
+                      )}
                     </svg>
                   )
-                })()
-              )}
+                })()}
 
               {/* Legend */}
               <div className="mt-2 flex items-center gap-4 flex-wrap">

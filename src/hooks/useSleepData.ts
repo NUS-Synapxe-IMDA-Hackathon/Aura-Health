@@ -51,11 +51,16 @@ export type WeeklyDay = {
 }
 
 type SleepDataResult = {
+  // Latest session — always the most recent night; never changes with weekOffset
   session: DbSleepSession | null
   intervals: DbInterval[]
+  loading: boolean
+  // Weekly chart — changes when weekOffset changes
   weekly: WeeklyDay[]
   weeklyIntervals: DbInterval[][]
-  loading: boolean
+  hasOlderWeek: boolean
+  hasNewerWeek: boolean
+  weeklyLoading: boolean
   error: string | null
 }
 
@@ -112,47 +117,100 @@ const MOCK_WEEKLY: WeeklyDay[] = mockWeekly.map((d, i) => ({
   hasApnea: i === 2,
 }))
 
-export function useSleepData(): SleepDataResult {
+export function useSleepData(weekOffset = 0): SleepDataResult {
+  // ── Latest session (score ring / architecture bar / vitals) ──────────────
+  // Fetched once on mount; never re-fetches when weekOffset changes.
   const [session, setSession] = useState<DbSleepSession | null>(null)
   const [intervals, setIntervals] = useState<DbInterval[]>([])
-  const [weekly, setWeekly] = useState<WeeklyDay[]>([])
-  const [weeklyIntervals, setWeeklyIntervals] = useState<DbInterval[][]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!supabase) {
       setSession(MOCK_SESSION)
       setIntervals([])
-      setWeekly(MOCK_WEEKLY)
-      setWeeklyIntervals(MOCK_WEEKLY.map(() => []))
       setLoading(false)
       return
     }
 
-    async function fetchData() {
+    async function fetchLatest() {
       try {
         const { data: sessions, error: sessErr } = await supabase!
           .from('sleep_sessions')
           .select('*')
           .eq('resident_id', RESIDENT_ID)
           .order('start_time', { ascending: false })
-          .limit(7)
+          .limit(1)
+
+        if (sessErr) throw sessErr
+        if (!sessions || sessions.length === 0) { setLoading(false); return }
+
+        const latest = sessions[0] as DbSleepSession
+        setSession(latest)
+
+        const { data: ivs, error: ivErr } = await supabase!
+          .from('sleep_stage_intervals')
+          .select('*')
+          .eq('sleep_session_id', latest.id)
+          .order('start_time', { ascending: true })
+
+        if (ivErr) throw ivErr
+        setIntervals((ivs ?? []) as DbInterval[])
+      } catch (err) {
+        console.error('[useSleepData latest]', err)
+        setError(err instanceof Error ? err.message : String(err))
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchLatest()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Weekly chart (changes with weekOffset) ───────────────────────────────
+  const [weekly, setWeekly] = useState<WeeklyDay[]>([])
+  const [weeklyIntervals, setWeeklyIntervals] = useState<DbInterval[][]>([])
+  const [hasOlderWeek, setHasOlderWeek] = useState(false)
+  const [weeklyLoading, setWeeklyLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setWeeklyLoading(true)
+
+    if (!supabase) {
+      setWeekly(weekOffset === 0 ? MOCK_WEEKLY : [])
+      setWeeklyIntervals(weekOffset === 0 ? MOCK_WEEKLY.map(() => []) : [])
+      setHasOlderWeek(false)
+      setWeeklyLoading(false)
+      return
+    }
+
+    async function fetchWeekly() {
+      try {
+        const from = weekOffset * 7
+        // Fetch 8 to detect whether an older week exists
+        const { data: sessions, error: sessErr } = await supabase!
+          .from('sleep_sessions')
+          .select('*')
+          .eq('resident_id', RESIDENT_ID)
+          .order('start_time', { ascending: false })
+          .range(from, from + 7)
 
         if (sessErr) throw sessErr
         if (!sessions || sessions.length === 0) {
-          setLoading(false)
+          setWeekly([])
+          setWeeklyIntervals([])
+          setHasOlderWeek(false)
+          setWeeklyLoading(false)
           return
         }
 
-        const latest = sessions[0] as DbSleepSession
-        const reversedSessions = [...sessions].reverse() as DbSleepSession[]
+        setHasOlderWeek(sessions.length > 7)
+        const displaySessions = sessions.slice(0, 7) as DbSleepSession[]
+        // Reverse so the chart renders oldest → newest (left → right)
+        const chronological = [...displaySessions].reverse()
+        setWeekly(chronological.map(s => mapToWeeklyDay(s)))
 
-        setSession(latest)
-        setWeekly(reversedSessions.map(s => mapToWeeklyDay(s)))
-
-        // Fetch intervals for ALL sessions in one query
-        const sessionIds = sessions.map(s => (s as DbSleepSession).id)
+        const sessionIds = displaySessions.map(s => s.id)
         const { data: allIvs, error: ivErr } = await supabase!
           .from('sleep_stage_intervals')
           .select('*')
@@ -161,26 +219,27 @@ export function useSleepData(): SleepDataResult {
 
         if (ivErr) throw ivErr
 
-        // Group intervals by session_id
         const intervalMap = new Map<string, DbInterval[]>()
         sessionIds.forEach(id => intervalMap.set(id, []));
         (allIvs ?? []).forEach(iv => {
           const arr = intervalMap.get((iv as DbInterval).sleep_session_id)
           if (arr) arr.push(iv as DbInterval)
         })
-
-        setIntervals(intervalMap.get(latest.id) ?? [])
-        setWeeklyIntervals(reversedSessions.map(s => intervalMap.get(s.id) ?? []))
+        setWeeklyIntervals(chronological.map(s => intervalMap.get(s.id) ?? []))
       } catch (err) {
-        console.error('[useSleepData]', err)
+        console.error('[useSleepData weekly]', err)
         setError(err instanceof Error ? err.message : String(err))
       } finally {
-        setLoading(false)
+        setWeeklyLoading(false)
       }
     }
 
-    fetchData()
-  }, [])
+    fetchWeekly()
+  }, [weekOffset])
 
-  return { session, intervals, weekly, weeklyIntervals, loading, error }
+  return {
+    session, intervals, loading,
+    weekly, weeklyIntervals, hasOlderWeek, hasNewerWeek: weekOffset > 0, weeklyLoading,
+    error,
+  }
 }

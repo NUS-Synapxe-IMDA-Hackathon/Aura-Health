@@ -106,11 +106,14 @@ export const mockIncident: Incident = {
   video: {
     clip_url: '',
     clip_duration_seconds: 15,
+    mime_type: 'video/mp4',
+    confidence: 94,
     fall_confirmed: 'confirmed',
     cause: 'Trip (rug)',
     mobility: 'Limited — unable to stand independently',
     injuries: ['None visible'],
     environment: ['Loose rug near sofa', 'Dim lighting'],
+    summary: 'Ashley tripped on a loose rug edge near the sofa, falling with high impact. Unable to stand independently after the fall.',
     moments: [
       { time: '0:01', description: 'Walking toward sofa',          significance: 'info'     },
       { time: '0:03', description: 'Foot catches rug edge',        significance: 'warning'  },

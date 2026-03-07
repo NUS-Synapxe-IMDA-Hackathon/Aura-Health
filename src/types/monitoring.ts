@@ -53,6 +53,12 @@ export type SleepSession = {
   respiration: number;
 };
 
+export type ResolvedIncident = {
+  incident: Incident;
+  resolution: "resolved" | "false_alarm";
+  resolvedAt: string;
+};
+
 export type PatientContext = {
   frame: WsFrame | null;
   connected: boolean;
@@ -63,6 +69,8 @@ export type PatientContext = {
   onAlertAction: (id: string, label: string) => void;
   fallResolvedAt: string | null;
   liveFallSnapshot: AlertItem | null;
+  resolvedIncident: ResolvedIncident | null;
+  onIncidentResolve: (type: "resolved" | "false_alarm", incident: Incident) => void;
 };
 
 // --- Caregiver Data Contract Types ---

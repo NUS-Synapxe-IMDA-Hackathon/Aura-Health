@@ -460,7 +460,7 @@ export function FallsPage() {
                       {resolvedIncident.resolution === 'false_alarm' ? 'False Alarm' : 'Resolved'}
                     </p>
                     <p className="text-[12px] text-slate-400 mt-0.5">
-                      {resolvedIncident.incident.tags.map(t => t.label).join(' · ')}
+                      {resolvedIncident.incident.tags.map((t: { label: string }) => t.label).join(' · ')}
                     </p>
                   </div>
                 </div>
