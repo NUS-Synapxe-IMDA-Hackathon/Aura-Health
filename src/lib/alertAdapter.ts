@@ -34,13 +34,21 @@ export function formatRelativeTime(iso: string): string {
 }
 
 export function alertToAlertItem(alert: Alert): AlertItem {
+  // Handle both nested ai_insight (live WS) and flat columns (Supabase rows)
+  const row = alert as Record<string, unknown>;
+  const insight = alert.ai_insight ?? {
+    summary: (row.ai_insight_summary as string) ?? "",
+    context: (row.ai_insight_context as string) ?? "",
+    recommendation: (row.ai_insight_recommendation as string) ?? "",
+  };
+
   return {
     id: alert.id,
     severity: alert.severity === "notice" ? "notice" : alert.severity,
     iconType: categoryToIconType(alert.category),
     title: alert.title,
-    detail: alert.ai_insight.summary,
-    context: alert.ai_insight.context || undefined,
+    detail: insight.summary,
+    context: insight.context || undefined,
     time: formatRelativeTime(alert.timestamp),
   };
 }
