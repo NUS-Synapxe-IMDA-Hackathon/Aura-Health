@@ -13,6 +13,11 @@ npm run preview    # Preview production build locally
 
 No test runner is configured in this project.
 
+## Git Workflow
+
+- **Default branch: `main`** — all feature branches and PRs target `main`
+- When creating PRs with `gh pr create`, always use `--base main`
+
 ## Architecture
 
 **AURA Health** is a React 19 + TypeScript caregiver monitoring app targeting a mobile viewport (max-w ~430px). It uses Vite, Tailwind CSS v4, and React Router v7.
@@ -26,6 +31,7 @@ No test runner is configured in this project.
 ### Shared State via Outlet Context
 
 `AppShell` maintains:
+
 - `fallStatus: FallStatus` — current fall state (`'fallen' | 'not_fallen'`), currently hardcoded to `'not_fallen'`
 - `filter: AlertFilter` — alert filter for AlertsPage (`'all' | 'critical' | 'warning' | 'notice'`)
 - `count` / `incrementReview` — tracks reviewed alert count
