@@ -11,16 +11,19 @@ The app runs as a progressive web app in a mobile browser (max width ~430px). Th
 ## 2. Target Users
 
 **Primary — Remote Caregiver (Sarah)**
+
 - Adult child or professional caregiver monitoring an elderly parent
 - Checks the app multiple times a day, especially after receiving a notification
 - Needs at-a-glance status, not raw sensor data
 - Prioritises trust and calm design; false alarms erode confidence
 
 **Secondary — On-site Nurse or Case Manager**
+
 - Reviews trend data (sleep, fall history) during home visits
 - Uses the Alerts tab to audit recent events and mark them resolved
 
 **Patient — Ashley, 78**
+
 - Does not interact with the app directly
 - Lives alone at home with mmWave radar sensors installed in key rooms
 
@@ -79,15 +82,15 @@ mmWave radar sensors publish JSON frames to a WebSocket endpoint. Each frame:
 
 ```ts
 type WsFrame = {
-  timestamp: string     // ISO 8601
-  presence: boolean     // someone in room
-  motion: 'none' | 'still' | 'active'
-  bmp: number           // body movement parameter (0–100+)
-  fallen: boolean       // fall classification
-  dwell: boolean        // stationary dwell alert
-  room: string          // 'living_room' | 'bathroom' | 'bedroom' | 'kitchen'
-  heartRate?: number    // optional from sensor fusion
-}
+  timestamp: string; // ISO 8601
+  presence: boolean; // someone in room
+  motion: "none" | "still" | "active";
+  bmp: number; // body movement parameter (0–100+)
+  fallen: boolean; // fall classification
+  dwell: boolean; // stationary dwell alert
+  room: string; // 'living_room' | 'bathroom' | 'bedroom' | 'kitchen'
+  heartRate?: number; // optional from sensor fusion
+};
 ```
 
 The app uses a `useWebSocket(url)` hook in production and `useMockWebSocket()` in development (toggled by `VITE_USE_MOCK_WS=true`). Both expose the same interface: `{ frame, connected, error }`.
@@ -96,10 +99,10 @@ The app uses a `useWebSocket(url)` hook in production and `useMockWebSocket()` i
 
 PostgreSQL via Supabase stores persistent records. Tables:
 
-| Table | Key columns |
-|---|---|
-| `alerts` | id, severity, title, subtitle, created_at, resolved_at |
-| `fall_events` | id, started_at, resolved_at, room, frames (JSONB) |
+| Table            | Key columns                                                                        |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| `alerts`         | id, severity, title, subtitle, created_at, resolved_at                             |
+| `fall_events`    | id, started_at, resolved_at, room, frames (JSONB)                                  |
 | `sleep_sessions` | id, date, score, deep_pct, light_pct, awake_pct, duration_min, avg_hr, respiration |
 
 The Supabase client (`src/lib/supabase.ts`) is initialised from `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. If either env var is absent, the client returns `null` and the app falls back to static mock data. No queries are implemented in this phase.
@@ -135,14 +138,14 @@ The Supabase client (`src/lib/supabase.ts`) is initialised from `VITE_SUPABASE_U
 
 ## 7. Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | React 19 + TypeScript |
-| Build | Vite 7 |
-| Routing | React Router v7 |
-| Styling | Tailwind CSS v4 |
-| UI Primitives | shadcn/ui (Radix UI) |
-| Charts | Recharts |
-| Live Data | WebSocket (real) / interval mock (dev) |
-| Database | Supabase (PostgreSQL) — stubbed in v1 |
-| Icons | Lucide React |
+| Layer         | Technology                             |
+| ------------- | -------------------------------------- |
+| Framework     | React 19 + TypeScript                  |
+| Build         | Vite 7                                 |
+| Routing       | React Router v7                        |
+| Styling       | Tailwind CSS v4                        |
+| UI Primitives | shadcn/ui (Radix UI)                   |
+| Charts        | Recharts                               |
+| Live Data     | WebSocket (real) / interval mock (dev) |
+| Database      | Supabase (PostgreSQL) — stubbed in v1  |
+| Icons         | Lucide React                           |

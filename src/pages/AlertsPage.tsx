@@ -1,28 +1,36 @@
-import { useMemo } from 'react'
-import { useOutletContext } from 'react-router-dom'
-import { cn } from '../lib/utils'
-import { AlertRow } from '../components/shared/AlertRow'
-import type { PatientContext } from '../types/monitoring'
-import type { AlertFilter } from '../types/monitoring'
-import { alerts } from '../data/mock'
+import { useMemo } from "react";
+import { useOutletContext } from "react-router-dom";
+import { cn } from "../lib/utils";
+import { AlertRow } from "../components/shared/AlertRow";
+import type { PatientContext } from "../types/monitoring";
+import type { AlertFilter } from "../types/monitoring";
 
-const FILTER_PILLS: { label: string; value: AlertFilter | 'all' }[] = [
-  { label: 'All',      value: 'all' },
-  { label: 'Critical', value: 'critical' },
-  { label: 'Warning',  value: 'warning' },
-  { label: 'Notice',   value: 'notice' },
-]
+const FILTER_PILLS: { label: string; value: AlertFilter | "all" }[] = [
+  { label: "All", value: "all" },
+  { label: "Critical", value: "critical" },
+  { label: "Warning", value: "warning" },
+  { label: "Notice", value: "notice" },
+];
 
 export function AlertsPage() {
-  const { fallStatus, filter, setFilter, alertActions, onAlertAction, liveFallSnapshot } = useOutletContext<PatientContext>()
-  const isFallen = fallStatus === 'fallen'
+  const {
+    fallStatus,
+    filter,
+    setFilter,
+    alertActions,
+    onAlertAction,
+    liveFallSnapshot,
+    alerts,
+  } = useOutletContext<PatientContext>();
+  const isFallen = fallStatus === "fallen";
 
   const visibleAlerts = useMemo(
-    () => alerts.filter(item => filter === 'all' || item.severity === filter),
-    [filter],
-  )
+    () => alerts.filter((item) => filter === "all" || item.severity === filter),
+    [filter, alerts],
+  );
 
-  const showLiveFall = liveFallSnapshot !== null && (filter === 'all' || filter === 'critical')
+  const showLiveFall =
+    liveFallSnapshot !== null && (filter === "all" || filter === "critical");
 
   return (
     <div className="pb-5">
@@ -31,7 +39,11 @@ export function AlertsPage() {
         <div>
           <p
             className="text-[28px] leading-none text-slate-900"
-            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, letterSpacing: '-0.01em' }}
+            style={{
+              fontFamily: "'Fraunces', Georgia, serif",
+              fontWeight: 700,
+              letterSpacing: "-0.01em",
+            }}
           >
             Alerts
           </p>
@@ -47,14 +59,27 @@ export function AlertsPage() {
         {!isFallen && (
           <div className="flex items-center gap-3 bg-white rounded-[20px] border border-slate-100 shadow-sm p-3.5">
             <div className="size-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="8" r="6"/>
-                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#059669"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="8" r="6" />
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
               </svg>
             </div>
             <div>
-              <p className="text-[13px] font-bold text-slate-800">3 days without critical alerts</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">Monitoring routine is working well</p>
+              <p className="text-[13px] font-bold text-slate-800">
+                3 days without critical alerts
+              </p>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Monitoring routine is working well
+              </p>
             </div>
           </div>
         )}
@@ -66,10 +91,10 @@ export function AlertsPage() {
               key={pill.value}
               onClick={() => setFilter(pill.value as AlertFilter)}
               className={cn(
-                'px-3.5 py-1 rounded-full text-[12px] font-semibold cursor-pointer flex-shrink-0 whitespace-nowrap border-[1.5px] transition-colors',
+                "px-3.5 py-1 rounded-full text-[12px] font-semibold cursor-pointer flex-shrink-0 whitespace-nowrap border-[1.5px] transition-colors",
                 filter === pill.value
-                  ? 'bg-slate-900 text-white border-slate-900'
-                  : 'bg-white text-slate-500 border-slate-200',
+                  ? "bg-slate-900 text-white border-slate-900"
+                  : "bg-white text-slate-500 border-slate-200",
               )}
             >
               {pill.label}
@@ -82,8 +107,8 @@ export function AlertsPage() {
           {showLiveFall && liveFallSnapshot && (
             <AlertRow
               alert={liveFallSnapshot}
-              actionTaken={alertActions['live-fall'] ?? null}
-              onAction={(label) => onAlertAction('live-fall', label)}
+              actionTaken={alertActions["live-fall"] ?? null}
+              onAction={(label) => onAlertAction("live-fall", label)}
             />
           )}
           {visibleAlerts.map((item) => (
@@ -96,11 +121,13 @@ export function AlertsPage() {
           ))}
           {!showLiveFall && visibleAlerts.length === 0 && (
             <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-6 text-center">
-              <p className="text-sm text-slate-400">No alerts for this filter.</p>
+              <p className="text-sm text-slate-400">
+                No alerts for this filter.
+              </p>
             </div>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }

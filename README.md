@@ -4,16 +4,16 @@ A caregiver-facing mobile web app for real-time monitoring of elderly patients. 
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | React 19 + TypeScript |
-| Build Tool | Vite 7 |
-| Styling | Tailwind CSS v4 |
-| Routing | React Router v7 |
-| UI Components | shadcn/ui |
-| WebSocket | Native browser WebSocket API |
-| Backend | Node.js + Express + `ws` (see mmWave repo) |
-| IoT | AWS IoT Core (MQTT via `aws-iot-device-sdk`) |
+| Layer         | Technology                                   |
+| ------------- | -------------------------------------------- |
+| Framework     | React 19 + TypeScript                        |
+| Build Tool    | Vite 7                                       |
+| Styling       | Tailwind CSS v4                              |
+| Routing       | React Router v7                              |
+| UI Components | shadcn/ui                                    |
+| WebSocket     | Native browser WebSocket API                 |
+| Backend       | Node.js + Express + `ws` (see mmWave repo)   |
+| IoT           | AWS IoT Core (MQTT via `aws-iot-device-sdk`) |
 
 ## Project Structure
 

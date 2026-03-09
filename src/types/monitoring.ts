@@ -70,7 +70,18 @@ export type PatientContext = {
   fallResolvedAt: string | null;
   liveFallSnapshot: AlertItem | null;
   resolvedIncident: ResolvedIncident | null;
-  onIncidentResolve: (type: "resolved" | "false_alarm", incident: Incident) => void;
+  onIncidentResolve: (
+    type: "resolved" | "false_alarm",
+    incident: Incident,
+  ) => void;
+  alerts: AlertItem[];
+  alertsLoading: boolean;
+  activeIncident: Incident | null;
+  pastIncidents: Incident[];
+  incidentsLoading: boolean;
+  riskScores: number[];
+  sendAction: (incidentId: string, action: IncidentActionId) => void;
+  caregiverConnected: boolean;
 };
 
 // --- Caregiver Data Contract Types ---
@@ -92,7 +103,11 @@ export type IncidentStatus =
   | "escalated"
   | "resolved";
 
-export type IncidentActionId = "ACK" | "TALK_TO_AGENT" | "TALK_TO_ELDERLY" | "ACK_MONITOR";
+export type IncidentActionId =
+  | "ACK"
+  | "TALK_TO_AGENT"
+  | "TALK_TO_ELDERLY"
+  | "ACK_MONITOR";
 
 export type Tag = {
   label: string;
@@ -209,7 +224,11 @@ export type Alert = {
 };
 
 // Report types
-export type ReportType = "daily_risk" | "sleep" | "post_incident" | "weekly_activity";
+export type ReportType =
+  | "daily_risk"
+  | "sleep"
+  | "post_incident"
+  | "weekly_activity";
 
 export type TrendPoint = {
   date: string;

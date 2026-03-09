@@ -3,20 +3,23 @@
 ## Typography
 
 ### Fonts
+
 - **Page / screen headers**: Fraunces (serif, weight 700) — loaded via Google Fonts in `index.html`, applied with inline `style={{ fontFamily: "'Fraunces', Georgia, serif" }}`
 - **All other UI**: System sans-serif stack — `-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif`
 
 ### Type scale
-| Role | Size | Weight | Color |
-|---|---|---|---|
-| Page title (Fraunces) | 28–30px | 700 | slate-900 |
-| Metric value | 36px | 700 | accent color |
-| Card label | 10–11px, uppercase, tracked | 700 | slate-400 |
-| Body / alert title | 13px | 600 | slate-800 |
-| Alert detail line | 11px | 600 | severity color |
-| Subtitle / caption | 11–13px | 400–500 | slate-400 |
+
+| Role                  | Size                        | Weight  | Color          |
+| --------------------- | --------------------------- | ------- | -------------- |
+| Page title (Fraunces) | 28–30px                     | 700     | slate-900      |
+| Metric value          | 36px                        | 700     | accent color   |
+| Card label            | 10–11px, uppercase, tracked | 700     | slate-400      |
+| Body / alert title    | 13px                        | 600     | slate-800      |
+| Alert detail line     | 11px                        | 600     | severity color |
+| Subtitle / caption    | 11–13px                     | 400–500 | slate-400      |
 
 ### Rules
+
 - No eyebrow / label text above main header titles on any screen
 - No em dashes anywhere in the UI — use line breaks, dots, or separate lines instead
 - Location and context go on their own line, never appended to a title with punctuation
@@ -26,23 +29,24 @@
 
 ## Colour Palette
 
-| Name | Hex | Usage |
-|---|---|---|
-| Teal | `#0d9488` | Primary brand, teal accents, notice alerts, active nav |
-| Rose | `#e11d48` | Critical alerts, fall state, heart rate |
-| Emerald | `#059669` | Safe state, normal readings, positive status |
-| Amber | `#d97706` | Warning alerts |
-| Blue | `#3b82f6` / `#1d4ed8` | Sleep metrics |
-| Slate-900 | `#0f172a` | Primary text, dark banner bg |
-| Slate-400 | `#94a3b8` | Labels, captions, secondary text |
-| White | `#ffffff` | Card backgrounds |
-| Slate-50 | `#f8fafc` | Page background |
+| Name      | Hex                   | Usage                                                  |
+| --------- | --------------------- | ------------------------------------------------------ |
+| Teal      | `#0d9488`             | Primary brand, teal accents, notice alerts, active nav |
+| Rose      | `#e11d48`             | Critical alerts, fall state, heart rate                |
+| Emerald   | `#059669`             | Safe state, normal readings, positive status           |
+| Amber     | `#d97706`             | Warning alerts                                         |
+| Blue      | `#3b82f6` / `#1d4ed8` | Sleep metrics                                          |
+| Slate-900 | `#0f172a`             | Primary text, dark banner bg                           |
+| Slate-400 | `#94a3b8`             | Labels, captions, secondary text                       |
+| White     | `#ffffff`             | Card backgrounds                                       |
+| Slate-50  | `#f8fafc`             | Page background                                        |
 
 ---
 
 ## Cards
 
 ### Rules
+
 - White background, `1px solid slate-100` border, subtle shadow only
 - **No gradients** — flat fills only
 - **No coloured background + border combo** — choose one or the other. If a card has a coloured background (e.g. rose-50 for a fall state), remove the border entirely
@@ -60,27 +64,30 @@
 - `AlertIcon` component and severity color maps are exported from `src/components/shared/AlertRow.tsx`
 
 ### Alert icon types (`AlertIconType`)
-| Key | Usage |
-|---|---|
+
+| Key              | Usage                    |
+| ---------------- | ------------------------ |
 | `alert-triangle` | Critical / fall detected |
-| `circle-info` | Warning / no movement |
-| `heart` | Warning / heart rate |
-| `clock` | Notice / time-based |
-| `moon` | Notice / sleep |
-| `check-circle` | OK / resolved |
-| `walking` | Notice / went out |
+| `circle-info`    | Warning / no movement    |
+| `heart`          | Warning / heart rate     |
+| `clock`          | Notice / time-based      |
+| `moon`           | Notice / sleep           |
+| `check-circle`   | OK / resolved            |
+| `walking`        | Notice / went out        |
 
 ---
 
 ## Header / Navigation
 
 ### Dashboard header
+
 - Patient name is the primary element — large, in Fraunces, no greeting prefix
 - Subtitle: age · current location, on the line below
 - Live pill: emerald-50 bg, pulsing dot, "Live" label
 - Profile avatar button (initials) top-right
 
 ### Bottom nav bar
+
 - 4 tabs: Dashboard, Falls, Sleep, Alerts
 - Active tab: `text-teal-600`; inactive: `text-slate-400`
 - Alert badge: rose-500 circle, positioned top-right of bell icon
@@ -91,6 +98,7 @@
 ## Alerts
 
 ### Three-tier message structure
+
 Every alert must have three layers:
 
 1. **Title** — the event type in plain language (e.g. "Fall detected", "No movement detected", "Morning walk")
@@ -98,12 +106,14 @@ Every alert must have three layers:
 3. **Context line** — OPTIONAL: what it means or what was done (e.g. "Longer than her usual pattern", "Emergency contacts notified")
 
 ### Severity colours for detail lines
+
 - Critical → `text-rose-600`
 - Warning → `text-amber-600`
 - Notice → `text-teal-600`
 - OK → `text-emerald-600`
 
 ### Card structure (Alerts page)
+
 - White card, `3px solid` left border in severity colour, `rounded-[20px]`
 - Icon wrap: tinted square `rounded-[10px]`, no border
 - Action buttons for critical and warning only, below a top-border divider
@@ -112,11 +122,13 @@ Every alert must have three layers:
 - No action buttons on notice or ok level alerts
 
 ### Dashboard recent alerts (simple rows)
+
 - All inside one parent white card
 - Each row: icon wrap + 3-tier text + time, separated by `border-b border-slate-100`
 - No action buttons
 
 ### What NOT to show
+
 - No redundant negative state banners ("No active fall alert right now")
 - Positive milestones (e.g. "3 days without critical alerts") go at the top of the alerts list as a clean white card with an emerald icon circle — no coloured card background
 
