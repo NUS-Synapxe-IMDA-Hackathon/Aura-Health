@@ -38,18 +38,18 @@ export function AlertsPage() {
       <div className="flex justify-between items-start px-5 pt-4 pb-6">
         <div>
           <p
-            className="text-[28px] leading-none text-slate-900"
+            className="text-[28px] leading-none text-[#212529]"
             style={{
-              fontFamily: "'Fraunces', Georgia, serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontWeight: 700,
               letterSpacing: "-0.01em",
             }}
           >
             Alerts
           </p>
-          <p className="text-[13px] text-slate-400 mt-1">Last 7 days</p>
+          <p className="text-[13px] text-[#6c757d] mt-1">Last 7 days</p>
         </div>
-        <button className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-[14px] font-bold text-slate-600 mt-1">
+        <button className="size-10 rounded-full bg-[#E8EAFF] flex items-center justify-center text-[14px] font-bold text-[#5b0df5] mt-1">
           LC
         </button>
       </div>
@@ -57,7 +57,7 @@ export function AlertsPage() {
       <div className="px-4 space-y-2">
         {/* Milestone card — only when no active fall */}
         {!isFallen && (
-          <div className="flex items-center gap-3 bg-white rounded-[20px] border border-slate-100 shadow-sm p-3.5">
+          <div className="flex items-center gap-3 bg-white rounded-[20px] border border-[#E8EAFF] shadow-[0_2px_8px_rgba(91,13,245,0.06)] p-3.5">
             <div className="size-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
               <svg
                 width="20"
@@ -74,10 +74,10 @@ export function AlertsPage() {
               </svg>
             </div>
             <div>
-              <p className="text-[13px] font-bold text-slate-800">
+              <p className="text-[13px] font-bold text-[#212529]">
                 3 days without critical alerts
               </p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-[11px] text-[#6c757d] mt-0.5">
                 Monitoring routine is working well
               </p>
             </div>
@@ -93,8 +93,8 @@ export function AlertsPage() {
               className={cn(
                 "px-3.5 py-1 rounded-full text-[12px] font-semibold cursor-pointer flex-shrink-0 whitespace-nowrap border-[1.5px] transition-colors",
                 filter === pill.value
-                  ? "bg-slate-900 text-white border-slate-900"
-                  : "bg-white text-slate-500 border-slate-200",
+                  ? "bg-[#5b0df5] text-white border-[#5b0df5]"
+                  : "bg-white text-[#6c757d] border-[#E8EAFF]",
               )}
             >
               {pill.label}
@@ -120,8 +120,8 @@ export function AlertsPage() {
             />
           ))}
           {!showLiveFall && visibleAlerts.length === 0 && (
-            <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-6 text-center">
-              <p className="text-sm text-slate-400">
+            <div className="rounded-[20px] border border-[#E8EAFF] bg-[#f8f8ff] px-4 py-6 text-center">
+              <p className="text-sm text-[#6c757d]">
                 No alerts for this filter.
               </p>
             </div>

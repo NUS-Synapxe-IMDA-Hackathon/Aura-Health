@@ -5,7 +5,7 @@ import type { AlertItem, AlertIconType } from "../../types/monitoring";
 export const alertIconWrapBg: Record<AlertItem["severity"], string> = {
   critical: "bg-rose-50",
   warning: "bg-amber-50",
-  notice: "bg-teal-50",
+  notice: "bg-[#5b0df5]/5",
   ok: "bg-emerald-50",
 };
 
@@ -13,7 +13,7 @@ export const alertIconWrapBg: Record<AlertItem["severity"], string> = {
 export const alertIconStroke: Record<AlertItem["severity"], string> = {
   critical: "#e11d48",
   warning: "#d97706",
-  notice: "#0d9488",
+  notice: "#5b0df5",
   ok: "#059669",
 };
 
@@ -21,14 +21,14 @@ export const alertIconStroke: Record<AlertItem["severity"], string> = {
 export const alertDetailColor: Record<AlertItem["severity"], string> = {
   critical: "text-rose-600",
   warning: "text-amber-600",
-  notice: "text-teal-600",
+  notice: "text-[#5b0df5]",
   ok: "text-emerald-600",
 };
 
 const severityBorderColor: Record<AlertItem["severity"], string> = {
   critical: "#e11d48",
   warning: "#d97706",
-  notice: "#0d9488",
+  notice: "#5b0df5",
   ok: "#059669",
 };
 
@@ -187,7 +187,7 @@ export function AlertRow({
   return (
     <div
       className={cn(
-        "bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden",
+        "bg-white rounded-[20px] border border-[#E8EAFF] shadow-[0_2px_8px_rgba(91,13,245,0.06)] overflow-hidden",
         className,
       )}
       style={{ borderLeft: `3px solid ${borderColor}` }}
@@ -206,10 +206,10 @@ export function AlertRow({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start gap-2">
-            <p className="text-[13px] font-semibold text-slate-800 leading-snug">
+            <p className="text-[13px] font-semibold text-[#212529] leading-snug">
               {alert.title}
             </p>
-            <span className="text-[11px] text-slate-400 flex-shrink-0">
+            <span className="text-[11px] text-[#6c757d] flex-shrink-0">
               {alert.time}
             </span>
           </div>
@@ -222,28 +222,28 @@ export function AlertRow({
             {alert.detail}
           </p>
           {alert.context && (
-            <p className="text-[12px] text-slate-400 mt-0.5">{alert.context}</p>
+            <p className="text-[12px] text-[#6c757d] mt-0.5">{alert.context}</p>
           )}
         </div>
       </div>
       {alertActions &&
         doneLabels &&
         (actionTaken ? (
-          <div className="mx-3.5 mb-3.5 pt-2.5 border-t border-slate-100">
-            <p className="text-[12px] font-semibold text-slate-400">
+          <div className="mx-3.5 mb-3.5 pt-2.5 border-t border-[#E8EAFF]">
+            <p className="text-[12px] font-semibold text-[#6c757d]">
               {actionTaken}
             </p>
           </div>
         ) : (
-          <div className="flex gap-2 mx-3.5 mb-3.5 pt-2.5 border-t border-slate-100">
+          <div className="flex gap-2 mx-3.5 mb-3.5 pt-2.5 border-t border-[#E8EAFF]">
             <button
-              className="flex-1 py-1.5 px-2.5 rounded-[10px] text-[12px] font-semibold bg-slate-100 text-slate-700 cursor-pointer"
+              className="flex-1 py-1.5 px-2.5 rounded-[10px] text-[12px] font-semibold bg-[#f8f8ff] text-[#212529] cursor-pointer"
               onClick={() => onAction?.(doneLabels[0])}
             >
               {alertActions[0]}
             </button>
             <button
-              className="flex-1 py-1.5 px-2.5 rounded-[10px] text-[12px] font-semibold bg-slate-900 text-white cursor-pointer"
+              className="flex-1 py-1.5 px-2.5 rounded-[10px] text-[12px] font-semibold bg-[#5b0df5] text-white cursor-pointer"
               onClick={() => onAction?.(doneLabels[1])}
             >
               {alertActions[1]}

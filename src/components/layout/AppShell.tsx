@@ -257,8 +257,8 @@ export function AppShell() {
   const alertBadgeCount = openAlerts + openLiveFall;
 
   return (
-    <div className="flex min-h-screen justify-center bg-slate-100">
-      <div className="relative h-dvh max-h-233 w-full max-w-107.5 overflow-hidden bg-slate-50">
+    <div className="flex min-h-screen justify-center bg-[#f8f8ff]">
+      <div className="relative h-dvh max-h-233 w-full max-w-107.5 overflow-hidden bg-white">
         <div className="absolute inset-x-0 top-0 bottom-20.5 overflow-y-auto pb-6">
           <Outlet context={context} />
         </div>
@@ -268,15 +268,15 @@ export function AppShell() {
           onClick={handleDevToggle}
           className="absolute top-2 right-2 z-30 rounded-full px-3 py-1 text-[11px] font-bold border"
           style={{
-            background: devFallen ? "#fff1f2" : "#f0fdfa",
-            color: devFallen ? "#e11d48" : "#0d9488",
-            borderColor: devFallen ? "#fecdd3" : "#99f6e4",
+            background: devFallen ? "#fff1f2" : "#f3f0ff",
+            color: devFallen ? "#e11d48" : "#5b0df5",
+            borderColor: devFallen ? "#fecdd3" : "#E8EAFF",
           }}
         >
           {devFallen ? "Fallen" : "Safe"}
         </button>
 
-        <div className="absolute inset-x-0 bottom-0 z-20 flex h-20.5 items-start border-t border-slate-200 bg-white/90 px-1 pt-2.5 pb-4 backdrop-blur-xl">
+        <div className="absolute inset-x-0 bottom-0 z-20 flex h-20.5 items-start border-t border-[#E8EAFF] bg-white/95 px-1 pt-2.5 pb-4 backdrop-blur-xl">
           {NAV_TABS.map((tab) => (
             <NavLink
               key={tab.to}
@@ -284,7 +284,7 @@ export function AppShell() {
               className={({ isActive }) =>
                 [
                   "relative flex flex-1 flex-col items-center gap-1 text-[10px] font-medium",
-                  isActive ? "text-teal-600" : "text-slate-400",
+                  isActive ? "text-[#5b0df5]" : "text-[#adb5bd]",
                 ].join(" ")
               }
             >
