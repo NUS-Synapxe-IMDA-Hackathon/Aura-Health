@@ -79,7 +79,11 @@ export class AuraCaregiverSocket {
       this.ws.close();
     }
 
-    const ws = new WebSocket(this.url);
+    const url = new URL(this.url);
+    if (!url.searchParams.has("contact_id")) {
+      url.searchParams.set("contact_id", "caregiver-app");
+    }
+    const ws = new WebSocket(url.toString());
 
     ws.onopen = () => {
       this.backoff = 1000;

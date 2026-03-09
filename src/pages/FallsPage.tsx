@@ -153,7 +153,7 @@ function IncidentDetail({
             {incident.narrative}
           </p>
           <div className="flex flex-wrap gap-1.5">
-            {incident.tags.map((tag, i) => (
+            {(incident.tags ?? []).map((tag, i) => (
               <span
                 key={i}
                 className={cn(
@@ -364,8 +364,9 @@ function IncidentDetail({
           </button>
           {timelineOpen && (
             <div className="relative pl-7 mt-3">
-              {incident.event_timeline.map((ev, idx) => {
-                const isLast = idx === incident.event_timeline.length - 1;
+              {(incident.event_timeline ?? []).map((ev, idx) => {
+                const isLast =
+                  idx === (incident.event_timeline ?? []).length - 1;
                 return (
                   <div key={idx} className="relative pb-4 last:pb-0">
                     <div
@@ -417,7 +418,7 @@ function IncidentDetail({
       {!isResolved && onResolve && (
         <>
           <div className="grid grid-cols-2 gap-2">
-            {incident.available_actions.map((action) => (
+            {(incident.available_actions ?? []).map((action) => (
               <button
                 key={action.id}
                 className={cn(
@@ -745,7 +746,7 @@ function PastIncidentCard({
             {isFalseAlarm ? "False Alarm" : "Resolved"}
           </p>
           <p className="text-[12px] text-slate-400 mt-0.5">
-            {incident.tags.map((t) => t.label).join(" · ")}
+            {(incident.tags ?? []).map((t) => t.label).join(" · ")}
           </p>
         </div>
       </div>
