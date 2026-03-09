@@ -8,10 +8,10 @@ const colorMap: Record<
   { bg: string; label: string; value: string; sub: string }
 > = {
   teal: {
-    bg: "bg-linear-to-br from-teal-50 to-teal-100",
-    label: "text-teal-700",
-    value: "text-teal-700",
-    sub: "text-teal-600",
+    bg: "bg-linear-to-br from-[#f3f0ff] to-[#E8EAFF]",
+    label: "text-[#5b0df5]",
+    value: "text-[#5b0df5]",
+    sub: "text-[#5b0df5]/80",
   },
   rose: {
     bg: "bg-linear-to-br from-rose-50 to-rose-100",
@@ -38,10 +38,10 @@ const colorMap: Record<
     sub: "text-blue-700",
   },
   slate: {
-    bg: "bg-linear-to-br from-slate-50 to-slate-100",
-    label: "text-slate-600",
-    value: "text-slate-800",
-    sub: "text-slate-500",
+    bg: "bg-linear-to-br from-[#f8f8ff] to-[#E8EAFF]",
+    label: "text-[#6c757d]",
+    value: "text-[#212529]",
+    sub: "text-[#6c757d]",
   },
 };
 

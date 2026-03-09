@@ -19,7 +19,7 @@ const FALLBACK_SEGMENTS = [
   ["18%", "bg-cyan-600"],
   ["8%", "bg-amber-200"],
   ["8%", "bg-amber-200"],
-  ["6%", "bg-slate-200"],
+  ["6%", "bg-[#E8EAFF]"],
   ["10%", "bg-sky-300"],
   ["12%", "bg-cyan-600"],
 ] as const;
@@ -107,16 +107,16 @@ export function SleepPage() {
     return (
       <div className="px-5 pt-4">
         <p
-          className="text-[28px] leading-none text-slate-900"
-          style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700 }}
+          className="text-[28px] leading-none text-[#212529]"
+          style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}
         >
           Sleep
         </p>
-        <p className="text-[13px] text-slate-400 mt-1 mb-1">
+        <p className="text-[13px] text-[#6c757d] mt-1 mb-1">
           {error ?? "No sleep data available."}
         </p>
         {error && (
-          <p className="text-[11px] text-slate-300 font-mono break-all">
+          <p className="text-[11px] text-[#adb5bd] font-mono break-all">
             {error}
           </p>
         )}
@@ -139,7 +139,7 @@ export function SleepPage() {
     scorePercent >= 80 ? "Good" : scorePercent >= 60 ? "Fair" : "Poor";
   const qualityColor =
     scorePercent >= 80
-      ? "text-teal-600"
+      ? "text-[#5b0df5]"
       : scorePercent >= 60
         ? "text-amber-600"
         : "text-rose-600";
@@ -242,22 +242,22 @@ export function SleepPage() {
       <div className="flex justify-between items-start px-5 pt-4 pb-6">
         <div>
           <p
-            className="text-[28px] leading-none text-slate-900"
+            className="text-[28px] leading-none text-[#212529]"
             style={{
-              fontFamily: "'Fraunces', Georgia, serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontWeight: 700,
               letterSpacing: "-0.01em",
             }}
           >
             Sleep
           </p>
-          <p className="text-[13px] text-slate-400 mt-1">
+          <p className="text-[13px] text-[#6c757d] mt-1">
             {loading
               ? "Loading session…"
               : `Last session · ${dateLabel} · ${durationH}h ${durationM > 0 ? `${durationM}m` : ""}`}
           </p>
         </div>
-        <button className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-[14px] font-bold text-slate-600 mt-1">
+        <button className="size-10 rounded-full bg-[#E8EAFF] flex items-center justify-center text-[14px] font-bold text-[#5b0df5] mt-1">
           LC
         </button>
       </div>
@@ -293,7 +293,7 @@ export function SleepPage() {
                   cy="64"
                   r={RING_R}
                   fill="none"
-                  stroke="#e2e8f0"
+                  stroke="#E8EAFF"
                   strokeWidth="12"
                 />
                 <circle
@@ -301,7 +301,7 @@ export function SleepPage() {
                   cy="64"
                   r={RING_R}
                   fill="none"
-                  stroke="#14b8a6"
+                  stroke="#5b0df5"
                   strokeWidth="12"
                   strokeLinecap="round"
                   strokeDasharray={`${Math.round(RING_CIRC * 0.25)} ${Math.round(RING_CIRC * 0.75)}`}
@@ -316,7 +316,7 @@ export function SleepPage() {
                   cy="64"
                   r={RING_R}
                   fill="none"
-                  stroke="#e2e8f0"
+                  stroke="#E8EAFF"
                   strokeWidth="12"
                 />
                 <circle
@@ -324,7 +324,7 @@ export function SleepPage() {
                   cy="64"
                   r={RING_R}
                   fill="none"
-                  stroke="#14b8a6"
+                  stroke="#5b0df5"
                   strokeWidth="12"
                   strokeLinecap="round"
                   strokeDasharray={`${loadedArc} ${loadedGap}`}
@@ -335,10 +335,10 @@ export function SleepPage() {
 
             {/* Inner label */}
             <div className="absolute inset-0 grid place-items-center">
-              <div className="grid h-24 w-24 place-items-center rounded-full bg-slate-50 text-center">
+              <div className="grid h-24 w-24 place-items-center rounded-full bg-[#f8f8ff] text-center">
                 <div>
                   <p
-                    className={`text-4xl leading-none font-semibold ${loading ? "text-slate-300" : "text-slate-900"}`}
+                    className={`text-4xl leading-none font-semibold ${loading ? "text-[#adb5bd]" : "text-[#212529]"}`}
                   >
                     {loading ? "--" : scorePercent}
                   </p>
@@ -349,7 +349,7 @@ export function SleepPage() {
                       {qualityLabel}
                     </p>
                   )}
-                  <p className="text-[9px] text-slate-400 mt-0.5">
+                  <p className="text-[9px] text-[#6c757d] mt-0.5">
                     Sleep Score
                   </p>
                 </div>
@@ -383,14 +383,14 @@ export function SleepPage() {
             <Card key={label} className="rounded-2xl py-3 shadow-sm">
               <CardContent className="px-2 text-center">
                 <div
-                  className={`mx-auto mb-1 h-3 w-3 rounded-sm ${loading ? "bg-slate-200" : color}`}
+                  className={`mx-auto mb-1 h-3 w-3 rounded-sm ${loading ? "bg-[#E8EAFF]" : color}`}
                 />
                 <p
-                  className={`text-sm font-bold ${loading ? "text-slate-300" : textColor}`}
+                  className={`text-sm font-bold ${loading ? "text-[#adb5bd]" : textColor}`}
                 >
                   {value}
                 </p>
-                <p className="text-[9px] font-bold tracking-wide text-slate-400 uppercase">
+                <p className="text-[9px] font-bold tracking-wide text-[#6c757d] uppercase">
                   {label}
                 </p>
               </CardContent>
@@ -401,12 +401,12 @@ export function SleepPage() {
         {/* Sleep architecture timeline */}
         <Card className="rounded-3xl py-4">
           <CardContent className="px-4">
-            <p className="mb-3 text-[15px] font-bold text-slate-900">
+            <p className="mb-3 text-[15px] font-bold text-[#212529]">
               Sleep Architecture
             </p>
 
             {loading ? (
-              <div className="h-12 rounded-xl bg-slate-100 animate-pulse" />
+              <div className="h-12 rounded-xl bg-[#f8f8ff] animate-pulse" />
             ) : (
               <>
                 {/* Timeline bar */}
@@ -450,13 +450,13 @@ export function SleepPage() {
 
                 {/* Time labels */}
                 <div className="mt-2 flex justify-between">
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-[10px] text-[#6c757d]">
                     {bedDate && hasIntervals ? fmtHour(bedDate) : "10 PM"}
                   </p>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-[10px] text-[#6c757d]">
                     {midDate && hasIntervals ? fmtHour(midDate) : "2 AM"}
                   </p>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-[10px] text-[#6c757d]">
                     {wakeDate && hasIntervals ? fmtHour(wakeDate) : "6 AM"}
                   </p>
                 </div>
@@ -472,19 +472,19 @@ export function SleepPage() {
               ].map(([color, label]) => (
                 <div key={label} className="flex items-center gap-1">
                   <div className={`h-2 w-3 rounded-sm ${color}`} />
-                  <span className="text-[10px] text-slate-500">{label}</span>
+                  <span className="text-[10px] text-[#6c757d]">{label}</span>
                 </div>
               ))}
               {hasApnea && (
                 <div className="flex items-center gap-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                  <span className="text-[10px] text-slate-500">Apnea</span>
+                  <span className="text-[10px] text-[#6c757d]">Apnea</span>
                 </div>
               )}
               {hasStruggle && (
                 <div className="flex items-center gap-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                  <span className="text-[10px] text-slate-500">Movement</span>
+                  <span className="text-[10px] text-[#6c757d]">Movement</span>
                 </div>
               )}
             </div>
@@ -494,21 +494,21 @@ export function SleepPage() {
         {/* Vitals grid */}
         <Card className="rounded-3xl py-4">
           <CardContent className="px-4">
-            <p className="mb-3 text-[15px] font-bold text-slate-900">
+            <p className="mb-3 text-[15px] font-bold text-[#212529]">
               Vitals During Sleep
             </p>
             <div className="grid grid-cols-2 gap-2">
               {vitalsMetrics.map(({ label, value, tone }) => (
                 <div
                   key={label}
-                  className="relative rounded-xl border border-slate-100 bg-slate-50 px-3 py-2"
+                  className="relative rounded-xl border border-[#E8EAFF] bg-[#f8f8ff] px-3 py-2"
                 >
                   <div className="flex items-center justify-between mb-0.5">
-                    <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase leading-none">
+                    <p className="text-[10px] font-bold tracking-wide text-[#6c757d] uppercase leading-none">
                       {label}
                     </p>
                     <button
-                      className="text-slate-300 active:text-slate-500 touch-manipulation -mr-0.5 -mt-0.5 p-0.5"
+                      className="text-[#adb5bd] active:text-[#6c757d] touch-manipulation -mr-0.5 -mt-0.5 p-0.5"
                       onClick={() =>
                         setActiveTooltip(activeTooltip === label ? null : label)
                       }
@@ -518,7 +518,7 @@ export function SleepPage() {
                     </button>
                   </div>
                   <p
-                    className={`text-sm font-bold ${loading ? "text-slate-300" : `text-slate-800 ${tone}`}`}
+                    className={`text-sm font-bold ${loading ? "text-[#adb5bd]" : `text-[#212529] ${tone}`}`}
                   >
                     {value}
                   </p>
@@ -529,16 +529,16 @@ export function SleepPage() {
             {/* Tooltip panel */}
             {activeTooltip && (
               <button
-                className="w-full mt-3 text-left rounded-xl bg-slate-100 px-3 py-2.5 touch-manipulation"
+                className="w-full mt-3 text-left rounded-xl bg-[#f8f8ff] px-3 py-2.5 touch-manipulation"
                 onClick={() => setActiveTooltip(null)}
               >
-                <p className="text-[12px] font-bold text-slate-700 mb-0.5">
+                <p className="text-[12px] font-bold text-[#212529] mb-0.5">
                   {activeTooltip}
                 </p>
-                <p className="text-[12px] text-slate-500 leading-relaxed">
+                <p className="text-[12px] text-[#6c757d] leading-relaxed">
                   {VITALS_INFO[activeTooltip]}
                 </p>
-                <p className="text-[10px] text-slate-400 mt-1.5">
+                <p className="text-[10px] text-[#adb5bd] mt-1.5">
                   Tap to dismiss
                 </p>
               </button>
@@ -547,20 +547,20 @@ export function SleepPage() {
         </Card>
 
         {/* AI insight */}
-        <div className="bg-slate-900 rounded-[24px] p-4">
+        <div className="bg-[#212529] rounded-[24px] p-4">
           <div className="flex items-center gap-1.5 mb-2">
             <svg
               width="14"
               height="14"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#5eead4"
+              stroke="#6aeff3"
               strokeWidth="2.5"
               strokeLinecap="round"
             >
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
-            <span className="text-[10px] font-extrabold tracking-[.1em] uppercase text-teal-300">
+            <span className="text-[10px] font-extrabold tracking-[.1em] uppercase text-[#6aeff3]">
               AI Sleep Insight
             </span>
           </div>
@@ -575,7 +575,7 @@ export function SleepPage() {
         <Card className="rounded-3xl py-4">
           <CardContent className="px-4">
             <div className="flex items-center justify-between mb-0.5">
-              <p className="text-[15px] font-bold text-slate-900">
+              <p className="text-[15px] font-bold text-[#212529]">
                 Weekly Sleep Architecture
               </p>
               <div className="flex items-center gap-0.5">
@@ -583,7 +583,7 @@ export function SleepPage() {
                 <button
                   onClick={goOlder}
                   disabled={!hasOlderWeek}
-                  className={`p-1.5 rounded-lg touch-manipulation ${hasOlderWeek ? "text-slate-500 active:bg-slate-100" : "text-slate-200"}`}
+                  className={`p-1.5 rounded-lg touch-manipulation ${hasOlderWeek ? "text-[#6c757d] active:bg-[#f8f8ff]" : "text-[#adb5bd]"}`}
                   aria-label="Previous week"
                 >
                   <svg
@@ -603,7 +603,7 @@ export function SleepPage() {
                 <button
                   onClick={goNewer}
                   disabled={!hasNewerWeek}
-                  className={`p-1.5 rounded-lg touch-manipulation ${hasNewerWeek ? "text-slate-500 active:bg-slate-100" : "text-slate-200"}`}
+                  className={`p-1.5 rounded-lg touch-manipulation ${hasNewerWeek ? "text-[#6c757d] active:bg-[#f8f8ff]" : "text-[#adb5bd]"}`}
                   aria-label="Next week"
                 >
                   <svg
@@ -622,7 +622,7 @@ export function SleepPage() {
               </div>
             </div>
             {weekRangeLabel && (
-              <p className="mb-3 text-[11px] text-slate-400">
+              <p className="mb-3 text-[11px] text-[#6c757d]">
                 {weekRangeLabel}
               </p>
             )}
@@ -724,7 +724,7 @@ export function SleepPage() {
                         y1={toY(t)}
                         x2={TOTAL_W - 4}
                         y2={toY(t)}
-                        stroke="#f1f5f9"
+                        stroke="#f8f8ff"
                         strokeWidth="1"
                       />
                       <text
@@ -733,7 +733,7 @@ export function SleepPage() {
                         textAnchor="end"
                         fontSize="8.5"
                         fontWeight="600"
-                        fill="#94a3b8"
+                        fill="#adb5bd"
                       >
                         {label}
                       </text>
@@ -761,7 +761,7 @@ export function SleepPage() {
                               y={y}
                               width={BAR_W}
                               height={h}
-                              fill="#f1f5f9"
+                              fill="#f8f8ff"
                               rx="3"
                               ry="3"
                             />
@@ -770,7 +770,7 @@ export function SleepPage() {
                               y={ly}
                               width={16}
                               height={5}
-                              fill="#e2e8f0"
+                              fill="#E8EAFF"
                               rx="2"
                               ry="2"
                             />
@@ -886,7 +886,7 @@ export function SleepPage() {
                               textAnchor="middle"
                               fontSize="9"
                               fontWeight="700"
-                              fill="#94a3b8"
+                              fill="#adb5bd"
                             >
                               {day.dayLabel}
                             </text>
@@ -962,7 +962,7 @@ export function SleepPage() {
               ].map(([color, label]) => (
                 <div key={label} className="flex items-center gap-1">
                   <div className={`h-2 w-3 rounded-sm ${color}`} />
-                  <span className="text-[10px] text-slate-500">{label}</span>
+                  <span className="text-[10px] text-[#6c757d]">{label}</span>
                 </div>
               ))}
               {(weeklyIntervals.some((ivs) =>
@@ -971,7 +971,7 @@ export function SleepPage() {
                 weekly.some((d) => d.hasApnea)) && (
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-rose-500" />
-                  <span className="text-[10px] text-slate-500">Apnea</span>
+                  <span className="text-[10px] text-[#6c757d]">Apnea</span>
                 </div>
               )}
             </div>

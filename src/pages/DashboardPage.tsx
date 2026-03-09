@@ -62,9 +62,9 @@ export function DashboardPage() {
       <div className="flex items-start justify-between px-5 pt-6 pb-6">
         <div>
           <p
-            className="text-[30px] leading-none text-slate-900"
+            className="text-[30px] leading-none text-[#212529]"
             style={{
-              fontFamily: "'Fraunces', Georgia, serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontWeight: 700,
               letterSpacing: "-0.01em",
             }}
@@ -72,26 +72,26 @@ export function DashboardPage() {
             Alex Tan
           </p>
           <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-[13px] text-slate-400">67 · {roomLabel}</span>
+            <span className="text-[13px] text-[#6c757d]">67 · {roomLabel}</span>
             <div
               className={cn(
                 "flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold",
                 connected
                   ? "bg-emerald-50 text-emerald-600"
-                  : "bg-slate-100 text-slate-400",
+                  : "bg-[#f8f8ff] text-[#adb5bd]",
               )}
             >
               <span
                 className={cn(
                   "size-1.5 rounded-full",
-                  connected ? "bg-emerald-500 animate-pulse" : "bg-slate-400",
+                  connected ? "bg-emerald-500 animate-pulse" : "bg-[#adb5bd]",
                 )}
               />
               {connected ? "Live" : "Offline"}
             </div>
           </div>
         </div>
-        <button className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-[14px] font-bold text-slate-600 -mt-1">
+        <button className="size-10 rounded-full bg-[#E8EAFF] flex items-center justify-center text-[14px] font-bold text-[#5b0df5] -mt-1">
           LC
         </button>
       </div>
@@ -100,8 +100,8 @@ export function DashboardPage() {
         {/* Heart Rate + Sleep cards — equal height grid */}
         <div className="grid grid-cols-2 gap-2.5">
           {/* Heart Rate */}
-          <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4 flex flex-col">
-            <p className="text-[10px] font-bold tracking-[.07em] uppercase text-slate-400">
+          <div className="bg-white rounded-[24px] border border-[#E8EAFF] shadow-[0_2px_8px_rgba(91,13,245,0.06)] p-4 flex flex-col">
+            <p className="text-[10px] font-bold tracking-[.07em] uppercase text-[#6c757d]">
               Heart Rate
             </p>
             <div className="flex items-baseline gap-1 mt-1.5">
@@ -111,19 +111,19 @@ export function DashboardPage() {
                 {heartRate ?? "--"}
               </span>
               {heartRate && (
-                <span className="text-[13px] text-slate-400 font-medium">
+                <span className="text-[13px] text-[#6c757d] font-medium">
                   bpm
                 </span>
               )}
             </div>
             <p
-              className={`text-[12px] font-semibold mt-1 ${heartRate ? "text-emerald-600" : "text-slate-400"}`}
+              className={`text-[12px] font-semibold mt-1 ${heartRate ? "text-emerald-600" : "text-[#6c757d]"}`}
             >
               {heartRate ? "Normal" : "Not detected"}
             </p>
             <div className="flex-1 min-h-4" />
             <div className="flex justify-between items-center">
-              <span className="text-[10px] text-slate-400">Live · now</span>
+              <span className="text-[10px] text-[#6c757d]">Live · now</span>
               <svg
                 width="28"
                 height="28"
@@ -146,19 +146,19 @@ export function DashboardPage() {
           </div>
 
           {/* Sleep */}
-          <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4 flex flex-col">
-            <p className="text-[10px] font-bold tracking-[.07em] uppercase text-slate-400">
+          <div className="bg-white rounded-[24px] border border-[#E8EAFF] shadow-[0_2px_8px_rgba(91,13,245,0.06)] p-4 flex flex-col">
+            <p className="text-[10px] font-bold tracking-[.07em] uppercase text-[#6c757d]">
               Sleep
             </p>
             <div className="flex items-baseline gap-1 mt-1.5">
-              <span className="text-[36px] font-bold leading-none tracking-[-0.03em] text-teal-600">
+              <span className="text-[36px] font-bold leading-none tracking-[-0.03em] text-[#5b0df5]">
                 88
               </span>
-              <span className="text-[13px] text-slate-400 font-medium">
+              <span className="text-[13px] text-[#6c757d] font-medium">
                 / 100
               </span>
             </div>
-            <p className="text-[12px] font-semibold text-teal-600 mt-1">
+            <p className="text-[12px] font-semibold text-[#5b0df5] mt-1">
               Good · 8h 00m
             </p>
             <div className="flex-1 min-h-4" />
@@ -182,9 +182,9 @@ export function DashboardPage() {
         </div>
 
         {/* Fall Risk banner */}
-        <div className="bg-slate-900 rounded-[24px] p-4 flex items-center justify-between">
+        <div className="bg-[#212529] rounded-[24px] p-4 flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-bold tracking-[.08em] uppercase text-white/40">
+            <p className="text-[10px] font-bold tracking-[.08em] uppercase text-white/50">
               Fall Risk
             </p>
             <p className="text-[18px] font-bold text-white mt-0.5 tracking-tight">
@@ -203,20 +203,20 @@ export function DashboardPage() {
             <span className="text-[18px] font-bold text-white leading-none">
               {riskScore}
             </span>
-            <span className="text-[8px] font-bold uppercase tracking-wide text-white/40">
+            <span className="text-[8px] font-bold uppercase tracking-wide text-white/50">
               risk
             </span>
           </div>
         </div>
 
         {/* Floorplan */}
-        <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4">
+        <div className="bg-white rounded-[24px] border border-[#E8EAFF] shadow-[0_2px_8px_rgba(91,13,245,0.06)] p-4">
           <div className="flex items-start justify-between mb-3">
             <div>
-              <p className="text-[16px] font-bold text-slate-900">
+              <p className="text-[16px] font-bold text-[#212529]">
                 {roomLabel}
               </p>
-              <p className="text-[12px] text-slate-400 mt-0.5">
+              <p className="text-[12px] text-[#6c757d] mt-0.5">
                 Home · Last updated now
               </p>
             </div>
@@ -231,7 +231,7 @@ export function DashboardPage() {
               {isFallen ? "Fall" : "Safe"}
             </span>
           </div>
-          <div className="bg-slate-50 border border-slate-200 rounded-[14px] p-2">
+          <div className="bg-[#f8f8ff] border border-[#E8EAFF] rounded-[14px] p-2">
             <svg
               viewBox="0 0 360 260"
               className="w-full h-auto"
@@ -243,8 +243,8 @@ export function DashboardPage() {
                 width="344"
                 height="244"
                 rx="6"
-                fill="#f8fafc"
-                stroke="#cbd5e1"
+                fill="#f8f8ff"
+                stroke="#dee2e6"
                 strokeWidth="2"
               />
               <rect
@@ -257,9 +257,9 @@ export function DashboardPage() {
                     ? isFallen
                       ? "#fecdd3"
                       : "#bbf7d0"
-                    : "#f1f5f9"
+                    : "#f8f8ff"
                 }
-                stroke="#cbd5e1"
+                stroke="#dee2e6"
                 strokeWidth="1.5"
               />
               <rect
@@ -272,9 +272,9 @@ export function DashboardPage() {
                     ? isFallen
                       ? "#fecdd3"
                       : "#bbf7d0"
-                    : "#f1f5f9"
+                    : "#f8f8ff"
                 }
-                stroke="#cbd5e1"
+                stroke="#dee2e6"
                 strokeWidth="1.5"
               />
               <rect
@@ -287,9 +287,9 @@ export function DashboardPage() {
                     ? isFallen
                       ? "#fecdd3"
                       : "#bbf7d0"
-                    : "#f1f5f9"
+                    : "#f8f8ff"
                 }
-                stroke="#cbd5e1"
+                stroke="#dee2e6"
                 strokeWidth="1.5"
               />
               <rect
@@ -302,9 +302,9 @@ export function DashboardPage() {
                     ? isFallen
                       ? "#fecdd3"
                       : "#bbf7d0"
-                    : "#f1f5f9"
+                    : "#f8f8ff"
                 }
-                stroke="#cbd5e1"
+                stroke="#dee2e6"
                 strokeWidth="1.5"
               />
               <line
@@ -312,7 +312,7 @@ export function DashboardPage() {
                 y1="135"
                 x2="340"
                 y2="135"
-                stroke="#cbd5e1"
+                stroke="#dee2e6"
                 strokeWidth="1.5"
               />
               <line
@@ -320,7 +320,7 @@ export function DashboardPage() {
                 y1="55"
                 x2="270"
                 y2="135"
-                stroke="#cbd5e1"
+                stroke="#dee2e6"
                 strokeWidth="1.5"
               />
               <line
@@ -328,7 +328,7 @@ export function DashboardPage() {
                 y1="150"
                 x2="226"
                 y2="240"
-                stroke="#cbd5e1"
+                stroke="#dee2e6"
                 strokeWidth="1.5"
               />
               <text
@@ -337,7 +337,7 @@ export function DashboardPage() {
                 textAnchor="middle"
                 fontSize="11"
                 fontWeight="700"
-                fill={activeRoom === "bedroom" ? "#334155" : "#94a3b8"}
+                fill={activeRoom === "bedroom" ? "#212529" : "#adb5bd"}
               >
                 BEDROOM
               </text>
@@ -347,7 +347,7 @@ export function DashboardPage() {
                 textAnchor="middle"
                 fontSize="11"
                 fontWeight="700"
-                fill={activeRoom === "living" ? "#334155" : "#94a3b8"}
+                fill={activeRoom === "living" ? "#212529" : "#adb5bd"}
               >
                 LIVING/
               </text>
@@ -357,7 +357,7 @@ export function DashboardPage() {
                 textAnchor="middle"
                 fontSize="11"
                 fontWeight="700"
-                fill={activeRoom === "living" ? "#334155" : "#94a3b8"}
+                fill={activeRoom === "living" ? "#212529" : "#adb5bd"}
               >
                 DINING
               </text>
@@ -367,7 +367,7 @@ export function DashboardPage() {
                 textAnchor="middle"
                 fontSize="11"
                 fontWeight="700"
-                fill={activeRoom === "kitchen" ? "#334155" : "#94a3b8"}
+                fill={activeRoom === "kitchen" ? "#212529" : "#adb5bd"}
               >
                 KITCHEN
               </text>
@@ -377,7 +377,7 @@ export function DashboardPage() {
                 textAnchor="middle"
                 fontSize="11"
                 fontWeight="700"
-                fill={activeRoom === "bath" ? "#334155" : "#94a3b8"}
+                fill={activeRoom === "bath" ? "#212529" : "#adb5bd"}
               >
                 BATH
               </text>
@@ -400,7 +400,7 @@ export function DashboardPage() {
         </div>
 
         {/* Recent Alerts */}
-        <p className="text-[11px] font-bold tracking-[.08em] text-slate-400 uppercase px-1 mt-4">
+        <p className="text-[11px] font-bold tracking-[.08em] text-[#6c757d] uppercase px-1 mt-4">
           Recent Alerts
         </p>
         <div className="space-y-2">
