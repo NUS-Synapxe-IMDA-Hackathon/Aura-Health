@@ -5,6 +5,7 @@ import type {
   Incident,
   IncidentActionId,
   LockedBy,
+  Report,
 } from "../types/monitoring";
 
 type CaregiverSocketCallbacks = {
@@ -13,15 +14,18 @@ type CaregiverSocketCallbacks = {
   onIncidentResolved?: (incidentId: string, resolution: string) => void;
   onIncidentLocked?: (incidentId: string, lockedBy: LockedBy) => void;
   onAlert?: (alert: Alert) => void;
+  onReport?: (report: Report) => void;
 };
 
 export function useCaregiverSocket(callbacks: CaregiverSocketCallbacks) {
   const [connected, setConnected] = useState(false);
   const socketRef = useRef<AuraCaregiverSocket | null>(null);
   const callbacksRef = useRef(callbacks);
-  callbacksRef.current = callbacks;
-
   const url = import.meta.env.VITE_CAREGIVER_WS_URL as string | undefined;
+
+  useEffect(() => {
+    callbacksRef.current = callbacks;
+  }, [callbacks]);
 
   useEffect(() => {
     if (!url) return;
@@ -41,6 +45,7 @@ export function useCaregiverSocket(callbacks: CaregiverSocketCallbacks) {
     socket.onIncidentLocked = (id, lockedBy) =>
       callbacksRef.current.onIncidentLocked?.(id, lockedBy);
     socket.onAlert = (alert) => callbacksRef.current.onAlert?.(alert);
+    socket.onReport = (report) => callbacksRef.current.onReport?.(report);
 
     socket.connect();
 

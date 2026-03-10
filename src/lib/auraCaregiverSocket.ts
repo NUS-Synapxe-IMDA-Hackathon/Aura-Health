@@ -9,6 +9,7 @@ import type {
   Incident,
   IncidentActionId,
   LockedBy,
+  Report,
 } from "../types/monitoring";
 
 export class AuraCaregiverSocket {
@@ -28,6 +29,7 @@ export class AuraCaregiverSocket {
   onIncidentLocked: ((incidentId: string, lockedBy: LockedBy) => void) | null =
     null;
   onAlert: ((alert: Alert) => void) | null = null;
+  onReport: ((report: Report) => void) | null = null;
   onStatus: ((state: string, message: string) => void) | null = null;
   onConnect: (() => void) | null = null;
   onDisconnect: (() => void) | null = null;
@@ -94,12 +96,23 @@ export class AuraCaregiverSocket {
       try {
         const msg = JSON.parse(ev.data as string);
         switch (msg.type) {
-          case "incident_created":
-            this.onIncidentCreated?.(msg.incident);
+          case "incident_created": {
+            const incident = (msg.incident ?? msg.data) as Incident | undefined;
+            if (incident) {
+              this.onIncidentCreated?.(incident);
+            }
             break;
-          case "incident_updated":
-            this.onIncidentUpdated?.(msg.incident_id, msg.incident);
+          }
+          case "incident_updated": {
+            const incident = (msg.incident ?? msg.data) as Incident | undefined;
+            const incidentId = (msg.incident_id ?? incident?.id) as
+              | string
+              | undefined;
+            if (incident && incidentId) {
+              this.onIncidentUpdated?.(incidentId, incident);
+            }
             break;
+          }
           case "incident_resolved":
             this.onIncidentResolved?.(
               msg.incident_id,
@@ -109,9 +122,20 @@ export class AuraCaregiverSocket {
           case "incident_locked":
             this.onIncidentLocked?.(msg.incident_id, msg.locked_by);
             break;
-          case "alert":
-            this.onAlert?.(msg.alert);
+          case "alert": {
+            const alert = (msg.alert ?? msg.data) as Alert | undefined;
+            if (alert) {
+              this.onAlert?.(alert);
+            }
             break;
+          }
+          case "report": {
+            const report = (msg.report ?? msg.data) as Report | undefined;
+            if (report) {
+              this.onReport?.(report);
+            }
+            break;
+          }
           case "status":
             this.onStatus?.(msg.state, msg.message);
             break;

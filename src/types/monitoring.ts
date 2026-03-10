@@ -250,6 +250,18 @@ export type ActivityClip = {
   captured_at: string;
 };
 
+export type RiskContributor = {
+  name: string;
+  type: "walking" | "chair_stand" | "room_safety" | "sleep";
+  score: number;
+  weight: number;
+  weighted_score: number;
+  key_finding: string;
+  clinical_concern: "none" | "mild" | "moderate" | "significant";
+  risk_indicators: string[];
+  raw_details: Record<string, unknown>;
+};
+
 export type DailyRiskData = {
   risk_score: number;
   risk_level: "low" | "moderate" | "high" | "critical";
@@ -258,6 +270,7 @@ export type DailyRiskData = {
   trend_data: TrendPoint[];
   metric_deviations: MetricDeviation[];
   activity_clips: ActivityClip[];
+  contributors: RiskContributor[];
 };
 
 export type SleepStages = {

@@ -107,7 +107,7 @@ export function AppShell() {
     setActiveIncident,
     resolveIncident,
   } = useIncidents();
-  const { scores: riskScores } = useRiskScores();
+  const { scores: riskScores, applyLiveReport } = useRiskScores();
 
   // WebSocket
   const { sendAction, connected: caregiverConnected } = useCaregiverSocket({
@@ -133,6 +133,9 @@ export function AppShell() {
     },
     onAlert: (alert) => {
       addLiveAlert(alert);
+    },
+    onReport: (report) => {
+      applyLiveReport(report);
     },
     onIncidentLocked: (_id, lockedBy) => {
       setActiveIncident((prev) =>
