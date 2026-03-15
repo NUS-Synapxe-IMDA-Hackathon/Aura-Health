@@ -11,6 +11,8 @@ export type AlertIconType =
   | "check-circle"
   | "walking";
 
+export type CalledState = "resolved" | "unresolved" | null;
+
 export type AlertItem = {
   id: string;
   severity: Exclude<AlertFilter, "all"> | "ok";
@@ -19,6 +21,7 @@ export type AlertItem = {
   detail: string;
   context?: string;
   time: string;
+  calledState: CalledState;
 };
 
 export type EventRowTone = "ok" | "notice" | "warning" | "critical";
@@ -209,7 +212,7 @@ export type AlertCategory =
   | "wellness_checkin"
   | "post_fall_pattern";
 
-export type AlertSeverityLevel = "warning" | "notice";
+export type AlertSeverityLevel = "critical" | "warning" | "notice";
 
 export type Alert = {
   id: string;
@@ -221,6 +224,7 @@ export type Alert = {
   incident_id: string | null;
   resident_id: string;
   timestamp: string;
+  called_state: CalledState;
 };
 
 // Report types

@@ -228,10 +228,10 @@ export function AlertRow({
       </div>
       {alertActions &&
         doneLabels &&
-        (actionTaken ? (
+        (actionTaken || alert.calledState === "resolved" ? (
           <div className="mx-3.5 mb-3.5 pt-2.5 border-t border-[#E8EAFF]">
             <p className="text-[12px] font-semibold text-[#6c757d]">
-              {actionTaken}
+              {actionTaken ?? "Resolved"}
             </p>
           </div>
         ) : (

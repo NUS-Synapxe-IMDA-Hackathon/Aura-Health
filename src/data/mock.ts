@@ -9,6 +9,7 @@ export const alerts: AlertItem[] = [
     detail: 'Bathroom · 18 minutes',
     context: 'Longer than his usual pattern',
     time: '2h ago',
+    calledState: 'unresolved',
   },
   {
     id: 'a3',
@@ -18,6 +19,7 @@ export const alerts: AlertItem[] = [
     detail: '102 bpm · 9 minutes sustained',
     context: 'Detected at 6:00 AM during rest',
     time: '6h ago',
+    calledState: 'unresolved',
   },
   {
     id: 'a4',
@@ -27,6 +29,7 @@ export const alerts: AlertItem[] = [
     detail: 'Left 8:14 AM · Returned 9:02 AM',
     context: '48 minutes · Matches usual routine',
     time: '14h ago',
+    calledState: null,
   },
   {
     id: 'a5',
@@ -36,6 +39,7 @@ export const alerts: AlertItem[] = [
     detail: '11:28 PM',
     context: '1h 43m later than his usual bedtime',
     time: '2d ago',
+    calledState: null,
   },
   {
     id: 'a6',
@@ -44,6 +48,7 @@ export const alerts: AlertItem[] = [
     title: 'Extended walk',
     detail: 'Away 2h 14m',
     time: '3d ago',
+    calledState: null,
   },
   {
     id: 'a7',
@@ -53,6 +58,7 @@ export const alerts: AlertItem[] = [
     detail: 'Living room',
     context: 'Emergency contacts notified',
     time: '4d ago',
+    calledState: 'resolved',
   },
 ]
 

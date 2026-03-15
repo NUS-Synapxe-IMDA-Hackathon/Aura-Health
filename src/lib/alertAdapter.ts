@@ -3,6 +3,7 @@ import type {
   AlertCategory,
   AlertIconType,
   AlertItem,
+  CalledState,
 } from "../types/monitoring";
 
 const CATEGORY_ICON: Record<AlertCategory, AlertIconType> = {
@@ -42,6 +43,12 @@ export function alertToAlertItem(alert: Alert): AlertItem {
     recommendation: (row.ai_insight_recommendation as string) ?? "",
   };
 
+  const rawCalledState = (row.called_state ?? alert.called_state) as string | null;
+  const calledState: CalledState =
+    rawCalledState === "resolved" || rawCalledState === "unresolved"
+      ? rawCalledState
+      : null;
+
   return {
     id: alert.id,
     severity: alert.severity === "notice" ? "notice" : alert.severity,
@@ -50,5 +57,6 @@ export function alertToAlertItem(alert: Alert): AlertItem {
     detail: insight.summary,
     context: insight.context || undefined,
     time: formatRelativeTime(alert.timestamp),
+    calledState,
   };
 }

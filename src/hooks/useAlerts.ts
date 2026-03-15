@@ -21,10 +21,10 @@ export function useAlerts() {
       try {
         const { data, error } = await supabase!
           .from("alerts")
-          .select("*")
+          .select("*, called_state")
           .eq("resident_id", RESIDENT_ID)
           .order("timestamp", { ascending: false })
-          .limit(50);
+          .limit(30);
 
         if (error) throw error;
         setAlerts((data ?? []).map((row) => alertToAlertItem(row as Alert)));
