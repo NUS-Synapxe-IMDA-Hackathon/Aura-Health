@@ -15,6 +15,14 @@ dist-ssr
 # Seed / import data (root-level only, not src/data/)
 /data/
 
+# Claude Code
+.claude/
+CLAUDE.md
+
+# Docs and database seeds
+docs/
+supabase/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
