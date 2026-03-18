@@ -14,7 +14,6 @@ const FILTER_PILLS: { label: string; value: AlertFilter | "all" }[] = [
 
 export function AlertsPage() {
   const {
-    fallStatus,
     filter,
     setFilter,
     alertActions,
@@ -22,8 +21,6 @@ export function AlertsPage() {
     liveFallSnapshot,
     alerts,
   } = useOutletContext<PatientContext>();
-  const isFallen = fallStatus === "fallen";
-
   const visibleAlerts = useMemo(
     () => alerts.filter((item) => filter === "all" || item.severity === filter),
     [filter, alerts],
@@ -55,34 +52,6 @@ export function AlertsPage() {
       </div>
 
       <div className="px-4 space-y-2">
-        {/* Milestone card — only when no active fall */}
-        {!isFallen && (
-          <div className="flex items-center gap-3 bg-white rounded-[20px] border border-[#E8EAFF] shadow-[0_2px_8px_rgba(91,13,245,0.06)] p-3.5">
-            <div className="size-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#059669"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="8" r="6" />
-                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-[13px] font-bold text-[#212529]">
-                3 days without critical alerts
-              </p>
-              <p className="text-[11px] text-[#6c757d] mt-0.5">
-                Monitoring routine is working well
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Filter pills */}
         <div className="flex gap-1.5 overflow-x-auto pb-1">

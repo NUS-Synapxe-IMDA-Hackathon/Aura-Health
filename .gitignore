@@ -12,8 +12,8 @@ dist
 dist-ssr
 *.local
 
-# Seed / import data
-data/
+# Seed / import data (root-level only, not src/data/)
+/data/
 
 # Editor directories and files
 .vscode/*

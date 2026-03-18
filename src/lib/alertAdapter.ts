@@ -5,6 +5,7 @@ import type {
   AlertItem,
   CalledState,
 } from "../types/monitoring";
+import { APP_NOW } from "./appTime";
 
 const CATEGORY_ICON: Record<AlertCategory, AlertIconType> = {
   vital_signs: "heart",
@@ -24,7 +25,7 @@ export function categoryToIconType(category: AlertCategory): AlertIconType {
 }
 
 export function formatRelativeTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
+  const diff = APP_NOW - new Date(iso).getTime();
   const mins = Math.floor(diff / 60_000);
   if (mins < 1) return "Just now";
   if (mins < 60) return `${mins}m ago`;

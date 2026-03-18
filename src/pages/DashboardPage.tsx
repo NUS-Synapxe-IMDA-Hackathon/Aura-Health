@@ -1,4 +1,4 @@
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate } from "react-router-dom";
 import { cn } from "../lib/utils";
 import { AlertRow } from "../components/shared/AlertRow";
 import type { PatientContext } from "../types/monitoring";
@@ -32,6 +32,7 @@ function riskLabel(score: number, isFallen: boolean): string {
 }
 
 export function DashboardPage() {
+  const navigate = useNavigate();
   const {
     frame,
     connected,
@@ -69,7 +70,7 @@ export function DashboardPage() {
               letterSpacing: "-0.01em",
             }}
           >
-            Alex Tan
+            Doris Ching
           </p>
           <div className="flex items-center gap-2 mt-1.5">
             <span className="text-[13px] text-[#6c757d]">67 · {roomLabel}</span>
@@ -182,13 +183,16 @@ export function DashboardPage() {
         </div>
 
         {/* Fall Risk banner */}
-        <div className="bg-[#212529] rounded-[24px] p-4 flex items-center justify-between">
+        <button
+          className="w-full bg-[#212529] rounded-[24px] p-4 flex items-center justify-between touch-manipulation text-left"
+          onClick={() => navigate("/falls", { state: { riskReport: true } })}
+        >
           <div>
             <p className="text-[10px] font-bold tracking-[.08em] uppercase text-white/50">
               Fall Risk
             </p>
             <p className="text-[18px] font-bold text-white mt-0.5 tracking-tight">
-              {riskLabel(riskScore, isFallen)}
+              {riskLabel(riskScore, false)}
             </p>
             <p className="text-[12px] text-white/50 mt-0.5">
               Continuously monitored
@@ -197,7 +201,7 @@ export function DashboardPage() {
           <div
             className={cn(
               "size-14 rounded-full border-[3px] flex flex-col items-center justify-center",
-              isFallen ? "border-rose-400" : "border-emerald-400",
+              "border-emerald-400",
             )}
           >
             <span className="text-[18px] font-bold text-white leading-none">
@@ -207,7 +211,7 @@ export function DashboardPage() {
               risk
             </span>
           </div>
-        </div>
+        </button>
 
         {/* Floorplan */}
         <div className="bg-white rounded-[24px] border border-[#E8EAFF] shadow-[0_2px_8px_rgba(91,13,245,0.06)] p-4">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { WsFrame } from "../types/monitoring";
+import { DEV_FORCE_FALLEN } from "../hooks/useIncidents";
 
 // Simulates a full fall scenario cycle: normal activity → fall → recovery
 const MOCK_SEQUENCE: Omit<WsFrame, "timestamp">[] = [
@@ -156,7 +157,8 @@ export function useMockWebSocket(): UseMockWebSocketResult {
   useEffect(() => {
     const connectTimer = setTimeout(() => {
       setConnected(true);
-      setFrame({ ...MOCK_SEQUENCE[0], timestamp: new Date().toISOString() });
+      // Index 1 = normal (HR 68), index 4 = fallen/elevated (HR 95)
+      setFrame({ ...MOCK_SEQUENCE[DEV_FORCE_FALLEN ? 4 : 1], timestamp: new Date().toISOString() });
     }, 500);
 
     return () => clearTimeout(connectTimer);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useLocation } from "react-router-dom";
 import { cn } from "../lib/utils";
 import { Card, CardContent } from "../components/ui/card";
 import type { Incident, PatientContext } from "../types/monitoring";
@@ -168,12 +168,12 @@ function IncidentDetail({
         </CardContent>
       </Card>
 
-      {/* Voice — What Alex Said */}
+      {/* Voice — What Doris Said */}
       {incident.voice && (
         <Card className="rounded-3xl py-4">
           <CardContent className="px-4">
             <p className="text-[15px] font-bold text-[#212529] mb-3">
-              What Alex Said
+              What Doris Said
             </p>
             <div className="space-y-3">
               {incident.voice.exchanges.map((ex, i) => (
@@ -187,7 +187,7 @@ function IncidentDetail({
                           : "text-rose-400",
                       )}
                     >
-                      {ex.speaker === "aura" ? "AURA" : "Alex"}
+                      {ex.speaker === "aura" ? "AURA" : "Doris"}
                     </span>
                     {ex.emotion && (
                       <span className="text-[10px] text-amber-500 font-semibold">
@@ -223,19 +223,25 @@ function IncidentDetail({
           <p className="text-[15px] font-bold text-[#212529] mb-3">
             What the Camera Saw
           </p>
-          <div className="relative bg-[#212529] rounded-xl h-36 flex items-center justify-center mb-3">
-            <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
+          {incident.video?.clip_url ? (
+            <video
+              src={incident.video.clip_url}
+              controls
+              className="w-full rounded-xl mb-3 bg-[#212529]"
+              style={{ maxHeight: "220px" }}
+            />
+          ) : (
+            <div className="relative bg-[#212529] rounded-xl h-36 flex items-center justify-center mb-3">
+              <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+              </div>
+              <span className="absolute bottom-2 right-3 text-white/50 text-[10px] font-mono">
+                0:{String(incident.video?.clip_duration_seconds ?? 15).padStart(2, "0")}
+              </span>
             </div>
-            <span className="absolute bottom-2 right-3 text-white/50 text-[10px] font-mono">
-              0:15
-            </span>
-            <span className="absolute top-2 left-3 text-[9px] font-bold uppercase tracking-wide text-white/40">
-              {isResolved ? "Recording" : "Analyzing…"}
-            </span>
-          </div>
+          )}
           {incident.video && (
             <>
               <div className="space-y-2 mb-3">
@@ -261,7 +267,6 @@ function IncidentDetail({
                   ["Cause", incident.video.cause],
                   ["Mobility", incident.video.mobility],
                   ["Injuries", incident.video.injuries.join(", ")],
-                  ["Environment", incident.video.environment.join(", ")],
                 ].map(([label, value]) => (
                   <div key={label} className="flex gap-2">
                     <span className="text-[11px] font-bold text-[#6c757d] w-20 flex-shrink-0">
@@ -416,39 +421,23 @@ function IncidentDetail({
 
       {/* Action buttons — only shown when incident is live */}
       {!isResolved && onResolve && (
-        <>
-          <div className="grid grid-cols-2 gap-2">
-            {(incident.available_actions ?? []).map((action) => (
-              <button
-                key={action.id}
-                className={cn(
-                  "py-3 rounded-[14px] text-[13px] font-bold touch-manipulation",
-                  action.id === "ACK"
-                    ? "bg-rose-500 text-white"
-                    : "bg-[#f8f8ff] text-[#212529]",
-                )}
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Resolution buttons */}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              className="py-3 rounded-[14px] text-[13px] font-bold bg-emerald-500 text-white touch-manipulation"
-              onClick={() => onResolve("resolved")}
-            >
-              Resolved
-            </button>
-            <button
-              className="py-3 rounded-[14px] text-[13px] font-bold bg-[#E8EAFF] text-[#6c757d] touch-manipulation"
-              onClick={() => onResolve("false_alarm")}
-            >
-              False Alarm
-            </button>
-          </div>
-        </>
+        <div className="grid grid-cols-3 gap-2">
+          <button className="py-3 rounded-[14px] text-[13px] font-bold bg-[#f8f8ff] text-[#212529] touch-manipulation">
+            Talk to Doris
+          </button>
+          <button
+            className="py-3 rounded-[14px] text-[13px] font-bold bg-emerald-500 text-white touch-manipulation"
+            onClick={() => onResolve("resolved")}
+          >
+            Resolved
+          </button>
+          <button
+            className="py-3 rounded-[14px] text-[13px] font-bold bg-[#E8EAFF] text-[#6c757d] touch-manipulation"
+            onClick={() => onResolve("false_alarm")}
+          >
+            False Alarm
+          </button>
+        </div>
       )}
     </div>
   );
@@ -831,7 +820,7 @@ function FallRiskReport({
           >
             Risk Report
           </p>
-          <p className="text-[13px] text-[#6c757d] mt-1">Updated 7 Mar 2026</p>
+          <p className="text-[13px] text-[#6c757d] mt-1">Updated 14 Mar 2026</p>
         </div>
         <button className="size-10 rounded-full bg-[#E8EAFF] flex items-center justify-center text-[14px] font-bold text-[#5b0df5] mt-1">
           LC
@@ -986,11 +975,16 @@ export function FallsPage() {
   const isFallen = fallStatus === "fallen";
   const currentIncident = activeIncident ?? mockIncident;
 
+  const location = useLocation();
   const [viewingResolved, setViewingResolved] = useState(false);
-  const [viewingRiskReport, setViewingRiskReport] = useState(false);
-  const [viewingIncident, setViewingIncident] = useState(false);
+  const [viewingRiskReport, setViewingRiskReport] = useState(
+    (location.state as { riskReport?: boolean } | null)?.riskReport === true,
+  );
+  const [viewingIncident, setViewingIncident] = useState(
+    (location.state as { viewIncident?: boolean } | null)?.viewIncident === true,
+  );
 
-  const subtitle = connected ? "Live · Updated just now" : "Connecting…";
+  const subtitle = connected ? "Live · Updated just now" : "Monitoring";
 
   function handleResolve(type: "resolved" | "false_alarm") {
     const resolvedAt = new Date().toLocaleTimeString("en-SG", {
@@ -1084,6 +1078,24 @@ export function FallsPage() {
     return (
       <div className="pb-5">
         <div className="px-5 pt-4 pb-6">
+          <button
+            className="flex items-center gap-1 mb-2 text-[#6c757d] touch-manipulation"
+            onClick={() => setViewingResolved(false)}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            <span className="text-[12px] font-semibold">Back</span>
+          </button>
           <p
             className="text-[28px] leading-none text-[#212529]"
             style={{
@@ -1100,7 +1112,6 @@ export function FallsPage() {
           incident={resolvedIncident.incident}
           isResolved
           resolutionLabel={label}
-          onBack={() => setViewingResolved(false)}
         />
       </div>
     );
@@ -1198,7 +1209,7 @@ export function FallsPage() {
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[13px] font-bold text-emerald-600">
-                Low
+                15 · Low
               </span>
               <svg
                 width="14"
@@ -1246,9 +1257,8 @@ export function FallsPage() {
             </span>
           </div>
           <p className="text-[13px] leading-relaxed text-white/80">
-            Latest sensor readings indicate no fall state. Motion and body
-            movement patterns are consistent with normal indoor activity.
-            Continue regular monitoring.
+            Latest fall risk report shows low fall risk. 
+            Current movement patterns, gait stability, and environmental conditions are all within safe thresholds. 
           </p>
         </div>
 

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { cn } from "../../lib/utils";
 import type { AlertItem, AlertIconType } from "../../types/monitoring";
 
@@ -180,6 +181,7 @@ export function AlertRow({
   actionTaken,
   onAction,
 }: AlertRowProps) {
+  const navigate = useNavigate();
   const borderColor = severityBorderColor[alert.severity];
   const alertActions = cardActions[alert.severity];
   const doneLabels = actionDoneLabel[alert.severity];
@@ -238,7 +240,11 @@ export function AlertRow({
           <div className="flex gap-2 mx-3.5 mb-3.5 pt-2.5 border-t border-[#E8EAFF]">
             <button
               className="flex-1 py-1.5 px-2.5 rounded-[10px] text-[12px] font-semibold bg-[#f8f8ff] text-[#212529] cursor-pointer"
-              onClick={() => onAction?.(doneLabels[0])}
+              onClick={() => {
+                onAction?.(doneLabels[0]);
+                if (alertActions[0] === "View Report")
+                  navigate("/falls", { state: { viewIncident: true } });
+              }}
             >
               {alertActions[0]}
             </button>

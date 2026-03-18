@@ -150,9 +150,6 @@ export function SleepPage() {
     bedDate && wakeDate
       ? new Date((bedDate.getTime() + wakeDate.getTime()) / 2)
       : null;
-  const dateLabel = bedDate
-    ? bedDate.toLocaleDateString("en-SG", { month: "short", day: "numeric" })
-    : "--";
   const durationH = s ? Math.floor(s.total_sleep_minutes / 60) : 0;
   const durationM = s ? s.total_sleep_minutes % 60 : 0;
 
@@ -169,7 +166,7 @@ export function SleepPage() {
     if (weekOffset === 0) return "This week";
     const fmt = (d: Date) =>
       d.toLocaleDateString("en-SG", { month: "short", day: "numeric" });
-    const end = new Date();
+    const end = new Date(2026, 2, 15); // App date: 15 Mar 2026
     end.setDate(end.getDate() - weekOffset * 7);
     const start = new Date(end);
     start.setDate(end.getDate() - 6);
@@ -254,7 +251,7 @@ export function SleepPage() {
           <p className="text-[13px] text-[#6c757d] mt-1">
             {loading
               ? "Loading session…"
-              : `Last session · ${dateLabel} · ${durationH}h ${durationM > 0 ? `${durationM}m` : ""}`}
+              : `Last session · 15 Mar · ${durationH}h ${durationM > 0 ? `${durationM}m` : ""}`}
           </p>
         </div>
         <button className="size-10 rounded-full bg-[#E8EAFF] flex items-center justify-center text-[14px] font-bold text-[#5b0df5] mt-1">

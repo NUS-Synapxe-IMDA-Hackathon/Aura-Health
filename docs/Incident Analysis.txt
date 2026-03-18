@@ -1,0 +1,77 @@
+Incident Analysis
+Confirmed fall
+Moderate severity
+Likely cause
+Collapse
+Post-fall mobility
+Unable to move
+Confidence
+90%
+Hide details
+Summary
+The individual is initially standing. At 0:05, they begin to move forward and left. At 0:06, their legs buckle, and they fall forward and down. By 0:07, they are on their hands and knees. At 0:08, they collapse fully onto their stomach, face down, and remain in this position from 0:09 to 0:17.
+
+Timeline
+0:04
+INFO
+Person is standing and looking towards the camera.
+
+0:05
+INFO
+Person begins to move forward and to the left.
+
+0:06
+CRITICAL
+Person's legs buckle and they begin to fall forward and down.
+
+0:07
+CRITICAL
+Person is on the floor, on their hands and knees, with their torso bent forward.
+
+0:08
+CRITICAL
+Person collapses completely onto their stomach, face down.
+
+0:09-0:17
+CRITICAL
+Person remains immobile on the floor in a prone position.
+
+Environment
+Room safety score
+20/100
+Scan confidence
+90%
+Summary
+A person is observed lying on the floor in a living room environment. The floor is cluttered with items, including clothing and an orange bag, particularly in the area around the sofa. One of the armchairs has significantly damaged and unstable upholstery. The general lighting appears adequate, and there are no visible wet surfaces or trailing cables.
+
+Hazards
+Floor Clutter Or Obstacles
+in front of the sofa and between the sofa and coffee table · New
+High hazard
+Clear the floor of all items, including clothing and the orange bag, to ensure unobstructed pathways.
+
+Unstable Furniture
+left armchair · New
+Medium hazard
+Repair or replace the damaged upholstery on the left armchair to ensure stability and prevent potential injury from sharp edges.
+
+Observations
+A person is lying face down on the floor in the living room.
+Concern
+Clothing is draped over the sofa.
+Info
+There are items on the coffee table, including what appears to be a remote control and some papers.
+Info
+The upholstery on the left armchair is torn and appears unstable.
+Warning
+An orange bag is on the floor near the sofa.
+Warning
+Risk indicators
+Person on the floor
+Indicator
+Info
+Clutter on the floor
+Indicator
+Info
+final decision
+Escalated to L2: critical

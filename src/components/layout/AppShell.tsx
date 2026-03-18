@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { usePatientData } from "../../hooks/usePatientData";
+import { DEV_FORCE_FALLEN } from "../../hooks/useIncidents";
 import type {
   AlertFilter,
   AlertItem,
@@ -82,14 +83,35 @@ const NAV_TABS = [
   },
 ];
 
+
+const ROOM_LABELS: Record<string, string> = {
+  living_room: "Living / Dining",
+  bathroom: "Bathroom",
+  bedroom: "Bedroom",
+  kitchen: "Kitchen",
+};
+
 export function AppShell() {
-  const { frame, connected } = usePatientData();
+  const { frame, connected, fallDetector } = usePatientData();
+  const frameRef = useRef(frame);
+  useEffect(() => { frameRef.current = frame; }, [frame]);
   const [filter, setFilter] = useState<AlertFilter>("all");
-  const [devFallen, setDevFallen] = useState(false);
   const [alertActions, setAlertActions] = useState<Record<string, string>>({});
   const [fallResolvedAt, setFallResolvedAt] = useState<string | null>(null);
   const [liveFallSnapshot, setLiveFallSnapshot] = useState<AlertItem | null>(
-    null,
+    DEV_FORCE_FALLEN
+      ? {
+          id: "live-fall",
+          severity: "critical",
+          iconType: "alert-triangle",
+          title: "Fall Detected",
+          detail: "Doris has fallen in the living room",
+          context:
+            "Doris has collapsed in the living room. View fall report for more information and further actions.",
+          time: "Just now",
+          calledState: null,
+        }
+      : null,
   );
   const [resolvedIncident, setResolvedIncident] =
     useState<ResolvedIncident | null>(null);
@@ -144,8 +166,39 @@ export function AppShell() {
     },
   });
 
+  // Wire fall detector WS into UI state — re-runs as new WS data arrives
+  useEffect(() => {
+    if (fallDetector.fallen) {
+      const room = frameRef.current?.room ?? "living_room";
+      const contextText =
+        fallDetector.escalationLevel === 2
+          ? "L2 escalation — emergency contacts notified"
+          : fallDetector.escalationLevel === 1
+            ? "L1 escalation — caregiver notified"
+            : "Assessing situation";
+
+      // Build live snapshot for Alerts page
+      setLiveFallSnapshot((prev) => ({
+        id: "live-fall",
+        severity: "critical",
+        iconType: "alert-triangle",
+        title: "Fall detected",
+        detail: prev?.detail ?? `${ROOM_LABELS[room] ?? room} · Just now`,
+        context: contextText,
+        time: "Just now",
+        calledState: null,
+      }));
+
+      setActiveIncident(mockIncident);
+      setResolvedIncident(null);
+      setFallResolvedAt(null);
+    }
+    // No else — fallen state persists until caregiver presses an action button
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fallDetector.fallen, fallDetector.escalationLevel]);
+
   const fallStatus: FallStatus =
-    activeIncident !== null || devFallen ? "fallen" : "not_fallen";
+    activeIncident !== null || fallDetector.fallen ? "fallen" : "not_fallen";
 
   function onIncidentResolve(
     type: "resolved" | "false_alarm",
@@ -157,13 +210,7 @@ export function AppShell() {
       second: "2-digit",
     });
     setResolvedIncident({ incident, resolution: type, resolvedAt });
-    setDevFallen(false);
-    setLiveFallSnapshot(null);
-    setAlertActions((prev) => {
-      const next = { ...prev };
-      delete next["live-fall"];
-      return next;
-    });
+    setAlertActions((prev) => ({ ...prev, "live-fall": type === "resolved" ? "Resolved" : "False Alarm" }));
     setFallResolvedAt(null);
 
     // Send action via WebSocket if connected
@@ -176,57 +223,12 @@ export function AppShell() {
   function onAlertAction(id: string, label: string) {
     setAlertActions((prev) => ({ ...prev, [id]: label }));
     if (id === "live-fall" && label === "Resolved") {
-      setFallResolvedAt(
-        new Date().toLocaleTimeString("en-SG", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }),
-      );
-      setDevFallen(false);
+      // Clear incident and fallen state but keep the card visible (snapshot stays)
+      const incident = activeIncident ?? mockIncident;
+      setResolvedIncident({ incident, resolution: "resolved", resolvedAt: new Date().toLocaleTimeString("en-SG", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) });
+      if (caregiverConnected && incident.id) sendAction(incident.id, "ACK");
+      resolveIncident(incident.id);
     }
-  }
-
-  const ROOM_LABELS: Record<string, string> = {
-    living_room: "Living / Dining",
-    bathroom: "Bathroom",
-    bedroom: "Bedroom",
-    kitchen: "Kitchen",
-  };
-
-  function handleDevToggle() {
-    if (!devFallen) {
-      // Triggering a new fall — clear previous state and capture a snapshot
-      setResolvedIncident(null);
-      setAlertActions((prev) => {
-        const next = { ...prev };
-        delete next["live-fall"];
-        return next;
-      });
-      setFallResolvedAt(null);
-      const room = frame?.room ?? "bathroom";
-      setLiveFallSnapshot({
-        id: "live-fall",
-        severity: "critical",
-        iconType: "alert-triangle",
-        title: "Fall detected",
-        detail: `${ROOM_LABELS[room] ?? room} · Just now`,
-        context: "Emergency contacts notified",
-        time: "Just now",
-      });
-      setActiveIncident(mockIncident);
-    } else {
-      // Manually toggling back to safe — discard the fall alert entirely
-      setLiveFallSnapshot(null);
-      setAlertActions((prev) => {
-        const next = { ...prev };
-        delete next["live-fall"];
-        return next;
-      });
-      setFallResolvedAt(null);
-      setActiveIncident(null);
-    }
-    setDevFallen((v) => !v);
   }
 
   const context: PatientContext = {
@@ -266,18 +268,6 @@ export function AppShell() {
           <Outlet context={context} />
         </div>
 
-        {/* Dev toggle — manual fall state control */}
-        <button
-          onClick={handleDevToggle}
-          className="absolute top-2 right-2 z-30 rounded-full px-3 py-1 text-[11px] font-bold border"
-          style={{
-            background: devFallen ? "#fff1f2" : "#f3f0ff",
-            color: devFallen ? "#e11d48" : "#5b0df5",
-            borderColor: devFallen ? "#fecdd3" : "#E8EAFF",
-          }}
-        >
-          {devFallen ? "Fallen" : "Safe"}
-        </button>
 
         <div className="absolute inset-x-0 bottom-0 z-20 flex h-20.5 items-start border-t border-[#E8EAFF] bg-white/95 px-1 pt-2.5 pb-4 backdrop-blur-xl">
           {NAV_TABS.map((tab) => (

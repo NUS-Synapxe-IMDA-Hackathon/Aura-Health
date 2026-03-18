@@ -5,6 +5,9 @@ import type { Incident } from "../types/monitoring";
 
 const RESIDENT_ID = "20000001-0000-4000-8000-000000000001";
 
+// Set to true to force fallen state for dev/demo
+export const DEV_FORCE_FALLEN = false;
+
 export function useIncidents() {
   const [activeIncident, setActiveIncident] = useState<Incident | null>(null);
   const [pastIncidents, setPastIncidents] = useState<Incident[]>([]);
@@ -12,6 +15,7 @@ export function useIncidents() {
 
   useEffect(() => {
     if (!supabase) {
+      if (DEV_FORCE_FALLEN) setActiveIncident(mockIncident);
       setPastIncidents([
         {
           ...mockIncident,
@@ -38,7 +42,7 @@ export function useIncidents() {
         const active = incidents.find((i) => !i.resolved_at) ?? null;
         const past = incidents.filter((i) => i.resolved_at);
 
-        setActiveIncident(active);
+        setActiveIncident(DEV_FORCE_FALLEN ? mockIncident : active);
         setPastIncidents(past);
       } catch (err) {
         console.error("[useIncidents]", err);

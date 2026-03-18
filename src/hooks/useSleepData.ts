@@ -92,8 +92,8 @@ function mapToWeeklyDay(s: DbSleepSession): WeeklyDay {
 
 const MOCK_SESSION: DbSleepSession = {
   id: mockSession.id,
-  start_time: "2026-03-03T14:00:00.000Z",
-  end_time: "2026-03-03T22:00:00.000Z",
+  start_time: "2026-03-15T14:00:00.000Z",
+  end_time: "2026-03-16T00:00:00.000Z",
   time_in_bed_minutes: mockSession.duration_min,
   total_sleep_minutes: Math.round(
     (mockSession.duration_min *
